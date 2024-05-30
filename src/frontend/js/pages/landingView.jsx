@@ -34,16 +34,16 @@ const LandingView = () => {
   },[])
 
 	return (
-    <div className="flex bg-dark overflow-hidden">
+    <div className="flex bg-w dark:bg-dark overflow-hidden">
       <div id="landing-main" className="w-full overflow-x-hidden overflow-y-auto px-28">
         <div className="flex flex-col pt-[60px] w-full max-w-[1440px] mx-auto">
         {/*--- hero section ------------------------------------ */}
             <div id="heroSection" className="w-full grid grid-cols-2 p-5 items-center">
               <div className="mx-auto my-8">
-                <h1 className="f-tittle text-[64px] py-8">Organizing your tasks has never been easier and more convinient</h1>
-                <p className="f-body text-xl py-2 w-8/12">Create a workspace and plan your way to go<br/> Your goals are just a few "checks" away from you </p>
+                <h1 className="f-tittle text-[64px] py-8 text-b dark:text-w">Organizing your tasks has never been easier and more convinient</h1>
+                <p className="f-body text-xl py-2 w-8/12 text-b dark:text-w">Create a workspace and plan your way to go<br/> Your goals are just a few "checks" away from you </p>
 
-                <button onClick={()=>{nav("/login")}} className="border rounded-[10rem] px-10 py-4 f-tittle text-xl bg-accent-l text-black mt-10 hover:bg-transparent hover:text-white transition duration-300 ease-in-out">Get started - its free!</button>
+                <button onClick={()=>{nav("/login")}} className="border dark:border-accent-l border-primary-n rounded-[10rem] px-10 py-4 f-tittle text-xl bg-primary-n dark:bg-accent-l dark:text-black mt-10 hover:bg-transparent hover:text-primary-n dark:hover:text-accent-l transition duration-300 ease-in-out">Get started - its free!</button>
               
               </div>
               <div className="mx-auto bg-b">
@@ -53,21 +53,21 @@ const LandingView = () => {
             
         {/*--- trusted by ------------------------------------ */}
             <div id="socialProofSection" className="w-full grid py-20">
-              <h2 className="flex justify-center w-full f-tittle text-[48px] my-5">
+              <h2 className="flex justify-center w-full f-tittle text-[48px] my-5 text-b dark:text-w">
                 Trusted by
               </h2>
                 <ul className="grid grid-cols-5 my-10">
-                  <li className="mx-auto f-tittle text-4xl">apple</li>
-                  <li className="mx-auto f-tittle text-4xl">microsoft</li>
-                  <li className="mx-auto f-tittle text-4xl">google</li>
-                  <li className="mx-auto f-tittle text-4xl">amazon</li>
-                  <li className="mx-auto f-tittle text-4xl">open ai</li>
+                  <li className="mx-auto f-tittle text-4xl text-b dark:text-w">apple</li>
+                  <li className="mx-auto f-tittle text-4xl text-b dark:text-w">microsoft</li>
+                  <li className="mx-auto f-tittle text-4xl text-b dark:text-w">google</li>
+                  <li className="mx-auto f-tittle text-4xl text-b dark:text-w">amazon</li>
+                  <li className="mx-auto f-tittle text-4xl text-b dark:text-w">open ai</li>
                 </ul>
             </div>
 
             {/*--- Why KeQQu?  ------------------------------------*/}
             <div id="whykeqqu" className=" w-full py-28">
-              <h2 className="flex justify-center py-10 f-tittle text-[48px]">Why KeQQu?</h2>
+              <h2 className="flex justify-center py-10 f-tittle text-[48px] text-b dark:text-w">Why KeQQu?</h2>
               <div className="grid min-[960px]:grid-cols-3 h-min py-10 gap-4">
                 <div className="bg-primary-d w-full h-full rounded-xl mx-auto p-5 flex flex-col">
                   <i className="fa-solid fa-trowel-bricks text-7xl mx-auto my-[12px]" />
@@ -91,27 +91,27 @@ const LandingView = () => {
             </div>
 
             {/*--- How does it work? -----------------------------------*/}
-            <div id="howitworks" className=" w-full py-28 text-black">
-              <div className="bg-accent-l w-full px-20 h-[24rem] rounded-[3rem] mx-auto py-12 flex">
+            <div id="howitworks" className=" w-full py-28  dark:text-b">
+              <div className="bg-primary-n dark:bg-accent-l w-full px-20 h-[24rem] rounded-[3rem] mx-auto py-12 flex">
                 <div className="w-2/6 pr-10">
                   <h2 className="f-tittle text-[32px]">How Does it Work?</h2>
                   <p className="f-body">Start using KeQQu now in 4 very simple steps</p>
                 </div>
                 <div className="grid grid-cols-2 w-4/6 pl-32">
                   <div className="flex mb-10">
-                    <h4 className="f-tittle text-5xl text-primary-n mr-3">1</h4>
+                    <h4 className="f-tittle text-5xl text-accent-n dark:text-primary-n mr-3">1</h4>
                     <p className="f-body pt-3 mr-5">Create your account.</p>
                   </div>
                   <div className="flex">
-                    <h4 className="f-tittle text-5xl text-primary-n mr-3">2</h4>
+                    <h4 className="f-tittle text-5xl text-accent-n dark:text-primary-n mr-3">2</h4>
                     <p className="f-body pt-3">Create your first workspace.</p>
                   </div>
                   <div className="flex">
-                    <h4 className="f-tittle text-5xl text-primary-n mr-3">3</h4>
+                    <h4 className="f-tittle text-5xl text-accent-n dark:text-primary-n mr-3">3</h4>
                     <p className="f-body pt-3 mr-5">Add as many lists as you need.</p>
                   </div>
                   <div className="flex">
-                    <h4 className="f-tittle text-5xl text-primary-n mr-3">4</h4>
+                    <h4 className="f-tittle text-5xl text-accent-n dark:text-primary-n mr-3">4</h4>
                     <p className="f-body pt-3">Add your tasks, and, you are good to go! </p>
                   </div>
                 </div>
@@ -120,8 +120,8 @@ const LandingView = () => {
 
             {/*--- Plans & Pricing ------------------------------------*/}
             <div id="pricing" className="w-full py-28">
-              <h2 className="flex justify-center py-10 f-tittle text-[48px] ">Plans & Pricing</h2>
-              <div className="grid lg:grid-cols-3 py-10 gap-4">
+              <h2 className="flex justify-center py-10 f-tittle text-[48px] text-b dark:text-w">Plans & Pricing</h2>
+              <div className="grid lg:grid-cols-3 py-10 gap-4 lg:min-h-98">
                 <div className="bg-primary-d size-full rounded-xl mx-auto px-10 pt-10 pb-16 flex flex-col">
                   <h4 className="f-tittle text-4xl flex justify-center">BASIC</h4>
                   <div className="w-full h-1 bg-accent-n mb-10 rounded-l-xl"></div>
@@ -194,11 +194,11 @@ const LandingView = () => {
             </div>
 
               {/*--- FAQ -----------------------------------*/}
-            <div id="faq" className="w-full py-28 text-black">
-              <div className="bg-accent-l w-full px-20 rounded-[3rem] mx-auto py-4 flex max-lg:flex-col">
+            <div id="faq" className="w-full py-2 text-black">
+              <div className="bg-primary-n dark:bg-accent-l w-full px-20 rounded-[3rem] mx-auto py-4 flex max-lg:flex-col">
                 <div className="w-full lg:w-2/5 py-14 max-lg:mx-auto max-lg:text-center">
-                  <h2 className="f-tittle text-[48px]">FAQ</h2>
-                  <p className="f-body my-2">Answers to some questions you may have</p>
+                  <h2 className="f-tittle text-[48px] text-w dark:text-b">FAQ</h2>
+                  <p className="f-body my-2 text-w dark:text-b">Answers to some questions you may have</p>
                 </div>
                 <div className="w-full lg:w-3/5 lg:p-10">
                   <Accordion question='Is it free?' answer='Yes, this software is 100% free.'/>
@@ -210,33 +210,35 @@ const LandingView = () => {
             </div>
 
             {/*--- Footer ----------------------------------------------------*/}
-            <div id="footer" className="bg-dark w-full py-28 text-black">
-              <div className="bg-primary-d w-[1360px] px-10 rounded-[3rem] mx-auto py-4 text-white">
+            <div id="footer" className=" bg-w dark:bg-dark w-full py-28 text-black">
+              <div className="bg-primary-l dark:bg-primary-d w-[1360px] px-10 rounded-[3rem] mx-auto py-4 text-white">
                 <div className="w-4/5 m-10 mx-auto flex justify-around">
-                  <h3 className="f-tittle text-[32px]">KeQQu</h3>
+                  <h3 className="f-tittle text-[32px] text-b dark:text-w">KeQQu</h3>
                   <ul className="flex w-2/5 items-center">
-                    <li className="f-tittle text-lg mx-auto">About</li>
-                    <li className="f-tittle text-lg mx-auto">Contact</li>
-                    <li className="f-tittle text-lg mx-auto">Support</li>
+                    <li className="f-tittle text-lg mx-auto text-b dark:text-w">About</li>
+                    <li onClick={() => nav("/contact")}
+                      className="f-tittle text-lg mx-auto text-b dark:text-w">Contact</li>
+                    <li onClick={() => nav("/contact")}
+                      className="f-tittle text-lg mx-auto text-b dark:text-w">Support</li>
                   </ul>
                   <div className="flex items-center pl-10">
                     <div> 
-                      <input type="email" placeholder="join our newsletter!" className="border-none outline-none bg-transparent placeholder-[#fff5c2] p-0 mx-2 placeholder:"  />
+                      <input type="email" placeholder="join our newsletter!" className="border-none outline-none bg-transparent dark:placeholder-[#e6daab] placeholder-[#442b50] p-0 mx-2 placeholder:"  />
                     
-                      <div className="bg-accent-l h-[1px] w-56"></div>
+                      <div className="bg-primary-n dark:bg-accent-l h-[1px] w-56"></div>
                     </div>
-                    <button className="mx-4 f-body border rounded-[30px] px-5  bg-[#fff5c2] text-black text-2xl  hover:text-white hover:bg-transparent transition duration-500 ease-in-out">⟶</button>
+                    <button className="mx-4 f-body border rounded-[30px] px-5 bg-primary-n text-w dark:bg-accent-n dark:text-black text-2xl hover:dark:text-white hover:text-b hover:bg-transparent transition duration-500 ease-in-out">⟶</button>
                   </div>
                 </div>
                 <div className="bg-gray-400 w-5/6 mx-auto h-1"></div>
                 <div className="flex w-9/12 mx-auto mt-5 mb-8 px-20 justify-between">
-                  <p className="f-body">2024 - Keqqu,Inc.</p>
+                  <p className="f-body text-b dark:text-w">2024 - Keqqu,Inc.</p>
                   <div className="flex items-center">
-                  <i className="fa fa-brands fa-instagram text-2xl mx-2" />
-                  <i className="fa fa-brands fa-youtube text-2xl mx-2" />
-                  <i className="fa fa-brands fa-discord text-2xl mx-2" />
-                  <i className="fa fa-brands fa-tiktok text-2xl mx-2" />
-                  <i className="fa fa-brands fa-twitter text-2xl mx-2" />
+                  <i className="fa fa-brands fa-instagram text-2xl mx-2 text-b dark:text-w" />
+                  <i className="fa fa-brands fa-youtube text-2xl mx-2 text-b dark:text-w" />
+                  <i className="fa fa-brands fa-discord text-2xl mx-2 text-b dark:text-w" />
+                  <i className="fa fa-brands fa-tiktok text-2xl mx-2 text-b dark:text-w" />
+                  <i className="fa fa-brands fa-twitter text-2xl mx-2 text-b dark:text-w" />
                 </div>
               </div>
             </div>

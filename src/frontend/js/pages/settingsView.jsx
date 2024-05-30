@@ -26,7 +26,7 @@ const SettingsView = () => {
             <div className="h-[1px] bg-red-500"></div>
           </div>
 
-          <div className="flex w-[68rem] h-[42rem] border-[1px] border-white rounded-[5rem] items-center justify-center">
+          <div className="flex flex-col w-[68rem] h-[42rem] border-[1px] border-white rounded-[5rem] items-center justify-center">
             <div className="flex w-4/6 m-10 items-center">
               <img className="rounded-full h-min w-5/12"
                 src={store.userData.avatar} alt="no img" />
@@ -49,6 +49,14 @@ const SettingsView = () => {
                     </li>
                   </ul>
                 </div>
+            </div>
+            <div className="w-full flex text-end">
+              <button className="mt-5 f-body justify-self-end w-full text-red-500 hover:bg-transparent hover:text-white transition duration-300 ease-in-out"
+                      onClick={()=>nav('/logout')}
+              >
+                Log out
+              </button>
+
             </div>
           </div>
             <button onClick={()=>{nav("/dashboard")}}

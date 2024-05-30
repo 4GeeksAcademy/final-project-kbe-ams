@@ -2,6 +2,8 @@ import React, { useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import { Context } from "../store/appContext.jsx"
 
+import { Tooltip as ReactTooltip } from "react-tooltip";
+
 import Constants from "../app/constants.js"
 import NavbarBreadcumb from "./navbarBreadcumb.jsx"
 import ProfileDropDown from "./profileDropDown.jsx"
@@ -36,6 +38,7 @@ const Navbar = () => {
   //---------------------------------------------------------------------------------------
 
   function handleAnchor(obj){
+    console.log('navbarbutton touched')
     if(store.activePage == Constants.PAGE.landing) {
       const 
         item= document.querySelector("#" + obj),
@@ -52,14 +55,18 @@ const Navbar = () => {
   return (
     <>
     {store.userData ? 
-      <div className="sticky top-0 bg-stone-200 dark:bg-dark text-stone-800 dark:text-zinc-400 w-full flex z-50 border-b border-gray-600">
+      <div className="sticky top-0 bg-w dark:bg-dark text-stone-800 dark:text-zinc-400 w-full flex z-50 border-b border-gray-600">
         <div className="flex h-[60px] w-full md:max-w-[1550px] mx-auto items-center justify-between px-8 md:px-4">
           <div className="flex items-center">
             <p onClick={()=>nav('/')} className="cursor-pointer text-2xl f-body font-[600] mr-20 text-dark dark:text-white">KeQQu</p>  
               <NavbarBreadcumb />
           </div>
             <div className="ml-10 flex items-center">
-              <div className=" w-6 h-6 flex items-center justify-center rounded-full mr-8 f-body border-2 border-white">?</div>
+              <div data-tooltip-id="my-tooltip-1"
+                className=" w-6 h-6 flex items-center justify-center rounded-full mr-8 f-body border-2 border-white"
+              >
+                  ?
+              </div>
               <button className="w-9 h-9 rounded-full overflow-hidden" onClick={()=>{set_profileDropDown(!profileDropDown)}}>
                 <img className="size-full" src={store.userData.avatar} alt="user avatar" />
               </button>
@@ -94,21 +101,21 @@ const Navbar = () => {
 
     : 
 
-    <div className="sticky top-0 bg-dark w-full flex z-50 border-b-[1px] border-gray-600">
+    <div className="sticky top-0 bg-w w-full flex z-50 border-b-[1px] border-gray-600  dark:bg-dark dark:text-zinc-400">
       <div className="flex h-[60px] w-full md:max-w-[1550px] mx-auto items-center justify-between px-8 md:px-4">
 
-          <p onClick={()=>{nav("/")}}className=" text-2xl f-body font-[600] mr-24">KeQQu</p>  
+          <p onClick={()=>{nav("/")}}className=" text-2xl f-body font-[600] mr-24  text-b dark:text-w">KeQQu</p>  
 
           <ul className="md:flex max-h-[60px] w-max-1/2 whitespace-nowrap hidden space-x-8">
-            <li onClick={()=>{handleAnchor("whykeqqu")}} className="m-5 mx-auto f-tittle cursor-pointer">Why KeQQu</li>
-            <li onClick={()=>{handleAnchor("howitworks")}} className="m-5 mx-auto f-tittle cursor-pointer">How it works</li>
-            <li onClick={()=>{handleAnchor("pricing")}} className="m-5 mx-auto f-tittle cursor-pointer">Pricing</li>
-            <li onClick={()=>{handleAnchor("faq")}} className="m-5 mx-auto f-tittle cursor-pointer">FAQ</li>
-            <li onClick={()=>{handleAnchor("footer")}} className="m-5 mx-auto f-tittle cursor-pointer">Contact</li>
+            <li onClick={()=>{handleAnchor("whykeqqu")}} className="m-5 mx-auto f-tittle cursor-pointer text-b dark:text-w">Why KeQQu</li>
+            <li onClick={()=>{handleAnchor("howitworks")}} className="m-5 mx-auto f-tittle cursor-pointer text-b dark:text-w">How it works</li>
+            <li onClick={()=>{handleAnchor("pricing")}} className="m-5 mx-auto f-tittle cursor-pointer text-b dark:text-w">Pricing</li>
+            <li onClick={()=>{handleAnchor("faq")}} className="m-5 mx-auto f-tittle cursor-pointer text-b dark:text-w">FAQ</li>
+            <li onClick={() => nav("/contact")} className="m-5 mx-auto f-tittle cursor-pointer text-b dark:text-w">Contact</li>
           </ul>
           <div className="ml-10">
-            <button onClick={()=>{nav("/signup")}} className="f-body border rounded-[30px] px-7 py-1 bg-w text-black hover:bg-transparent hover:text-white transition duration-300 ease-in-out">Register</button>
-            <button onClick={()=>{nav("/login")}} className="f-body border rounded-[30px] ml-10 px-7 py-1 hover:bg-white hover:text-black transition duration-300 ease-in-out">Login</button>
+            <button onClick={()=>{nav("/signup")}} className="f-body border border-black dark:border-w hover:bg-black rounded-[30px] px-7 py-1 text-b dark:bg-w dark:text-black dark:hover:bg-transparent hover:text-white transition duration-300 ease-in-out">Register</button>
+            <button onClick={()=>{nav("/login")}} className="f-body hover:bg-b hover:text-w border-black border-[1px] dark:border-w rounded-[30px] ml-10 px-7 py-1 text-b dark:text-w dark:hover:bg-white dark:hover:text-black transition duration-300 ease-in-out">Login</button>
           </div>
 
         { navbarState &&
@@ -127,7 +134,7 @@ const Navbar = () => {
             <li className="border-b border-black p-5">FAQ</li>
             <li className="p-5 border-b border-black">Contact</li>
             <li className="border-b border-black p-5">This should only show for mobile devices but for now...</li>
-        <li className="border-b border-black p-5">This should only show for mobile devices
+            <li className="border-b border-black p-5">This should only show for mobile devices
             but for now...</li>
           </ul>
         </div>
@@ -137,6 +144,14 @@ const Navbar = () => {
       </div>
     </div>
     }
+
+
+    <ReactTooltip
+      className="w-16"
+      id="my-tooltip-1"
+      place="bottom"
+      content={<p>Don't know how to use Keqqu?<br></br>Don't worry, soon you will have tutorial videos! </p>}
+    />
     
     </>
   )

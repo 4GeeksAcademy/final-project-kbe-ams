@@ -77,6 +77,7 @@
 		"react-polyfills": "0.0.1",
 		"react-router-dom": "^6.23.1",
 		"react-scroll": "^1.9.0",
+		"react-tooltip": "^5.26.4",
 		"tailwindcss": "^3.4.3"
 	}
 }

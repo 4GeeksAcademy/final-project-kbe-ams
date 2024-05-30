@@ -18,6 +18,8 @@ import WorkspaceView from "./pages/workspaceView.jsx" // workspace manager
 //import ProjectView from "./pages/projectView.jsx" // project view
 import BoardView from "./pages/boardView.jsx" // board view
 
+import Contact from "./pages/contact.jsx" //contact view
+
 import { Redirector, NotFound_Generic, HealthCheck, CreamyFap } from "./app/internal.jsx" // redirector, generic 404, health check, paja a la crema
 import GlobalListener from "./app/globalListener.jsx" // redirector, generic 404, health check, paja a la crema
 
@@ -56,6 +58,8 @@ const Layout = () => {
                   <Route strict path="/farewell" element={<SessionManagerView mode={Constants.SESSION_MODE_DELETED}/>} />
       
                   <Route strict path="/settings" element={preventVisitor(<SettingsView />)} />
+
+                  <Route strict path="/contact" element={<Contact />} />
 
                   <Route strict path="/dashboard" element={preventVisitor(<DashboardView />)} />
                   <Route strict path="/workspace/:wid" element={preventVisitor(<WorkspaceView />)} />

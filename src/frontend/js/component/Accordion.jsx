@@ -4,16 +4,16 @@ const Accordion = ({question, answer}) => {
   const [accordionOpen, setAccordionOpen] = useState(false)
 
   return (
-    <div onClick={() => setAccordionOpen(!accordionOpen)} className="bg-primary-n px-10 py-5 rounded-[3rem] my-8">
+    <div onClick={() => setAccordionOpen(!accordionOpen)} className="bg-accent-l dark:bg-primary-n px-10 py-5 rounded-[3rem] my-8">
       <div className="py-2">
         <div className="flex w-full h-full justify-between items-center">
-          <p className="f-tittle text-w flex">{question}</p>
+          <p className="f-tittle dark:text-w flex">{question}</p>
           {!accordionOpen ? 
-            <span className="text-yellow-400 text-3xl transition duration-700 ease-in-out">
+            <span className="dark:text-yellow-400 text-3xl transition duration-700 ease-in-out">
               <i className="fa fa-regular fa-circle-plus"/>
             </span> 
             : 
-            <span className="text-yellow-400 text-3xl transition duration-500 ease-in-out">
+            <span className="dark:text-yellow-400 text-3xl transition duration-500 ease-in-out">
               <i className="fa fa-regular fa-circle-minus"/>
             </span>
           }
@@ -25,7 +25,7 @@ const Accordion = ({question, answer}) => {
               : "grid-rows-[0fr] opacity-0"
           }`}
         >
-          <div className="overflow-hidden text-w mr-10 f-body-sm">{answer}</div>
+          <div className="overflow-hidden dark:text-w mr-10 f-body-sm">{answer}</div>
         </div>
       </div>
     </div>
