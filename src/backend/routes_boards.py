@@ -16,7 +16,7 @@ def handle_boards(): return "boards subdomain", 200
 # get all boards available for the current user
 @boards.route('/user', methods=['GET'])
 @jwt_required()
-def handle_workspaces_user():
+def handle_boards_user():
   
   user, error= api_utils.get_user_by_identity()
   if error: return error
@@ -65,7 +65,7 @@ def handle_boards_instance_create(json):
 # get a single board
 @boards.route('/instance/<int:id>', methods=['GET'])
 @jwt_required()
-def handle_workspaces_instance_get(id):
+def handle_boards_instance_get(id):
   
   user, error= api_utils.get_user_by_identity()
   if error: return error

@@ -21,10 +21,13 @@ const LandingView = () => {
 
       if(href && href != "") {
     
-        const item= document.querySelector("#" + href)
-        if(item) {
+        const 
+          item= document.querySelector("#" + href),
+          page= document.querySelector("#landing-main")
+          
+        if(item && page) {
           const y= item.getBoundingClientRect().top
-          window.scrollTo({ top: y, left: 0, behavior: "smooth" })
+          page.scrollTo({ top: y, left: 0, behavior: "smooth" })
         }
       }
     }, 125)
@@ -32,7 +35,7 @@ const LandingView = () => {
 
 	return (
     <div className="flex bg-dark overflow-hidden">
-      <div className="w-full overflow-x-hidden overflow-y-auto px-28">
+      <div id="landing-main" className="w-full overflow-x-hidden overflow-y-auto px-28">
         <div className="flex flex-col pt-[60px] w-full max-w-[1440px] mx-auto">
         {/*--- hero section ------------------------------------ */}
             <div id="heroSection" className="w-full grid grid-cols-2 p-5 items-center">

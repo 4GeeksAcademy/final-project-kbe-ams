@@ -53,9 +53,7 @@ const BoardView= ()=>{
 
   // state updates
   React.useEffect(()=> { async function handle(){
-    console.log("readyState:", localState)
     if(localState== _READYSTATE.check){
-      console.log("readystate-check")
       if(store.readyState.board) {
         console.log("clearing previous board")
         actions.clearBoard()
@@ -66,7 +64,6 @@ const BoardView= ()=>{
       set_localState(_READYSTATE.requireLoad)
     }
     else if(localState== _READYSTATE.requireLoad) {
-      console.log("readystate-requireLoad")
       const idnum= Number(bid??"-1")
       if(idnum > 0) {
         set_localState(_READYSTATE.loading)
@@ -80,14 +77,12 @@ const BoardView= ()=>{
       }
     }
     else if(localState == _READYSTATE.loading){
-      console.log("readystate-loading")
       actions.setNavbarBreadcumb([ 
         ["/title.dashboard", "/dashboard"],
         ["/common.loading", null] 
       ])
     }
     else if(localState === _READYSTATE.ready){
-      console.log("readystate-ready")
       actions.setNavbarBreadcumb(
         store.board.workspace_id != -1 ?
         [
@@ -101,7 +96,6 @@ const BoardView= ()=>{
       )
     }
     else if(localState == _READYSTATE.errored){
-      console.log("readystate-errored")
       actions.setNavbarBreadcumb([ 
         ["/title.dashboard", "/dashboard"],
         ["/error.boardnotfound", null] 

@@ -49,10 +49,23 @@ const Board= ()=>{
   function merge_canvasState(new_state){ _scs({ ...Object.assign(canvasStateRef.current, { ...new_state, millistamp: Date.now() })})}
   function set_currentAction(new_action){ _scs({ ...Object.assign(canvasStateRef.current, { lastaction: canvasStateRef.current.action, action: new_action, millistamp: Date.now() })})}
 
-  React.useEffect(()=>{
+  React.useEffect(()=>{ async function handle(){
 
-    if(store.items.length > 0){
+    if(store.readyState.board){
 
+      merge_canvasState({
+        coords: {x:store.board.origin[0], y:store.board.origin[1] },
+        dirty: Constants.CANVAS_DIRTY.all
+      })
+
+      await actions.objects_board_get()
+    }
+  } handle() },[store.readyState.board])
+  
+  React.useEffect(()=>{ async function handle(){
+
+    if(store.items){
+  
       const content= store.board.content
       if(content?.length > 0){
 
@@ -68,12 +81,17 @@ const Board= ()=>{
         set_childItems(react)
         console.log(`board contains ${react.length} items`)
       }
-      else console.log(`empty board with id: ${store.board.id}`)
     }
-    
-  },[store.board])
+    else console.log(`empty board with id: ${store.board.id}`)
+
+  } handle() },[store.readyState.content])
  
-  React.useEffect(()=>{ merge_canvasState({dirty:Constants.CANVAS_DIRTY.all}) },[canvasRef])
+  React.useEffect(()=>{ 
+    merge_canvasState({
+      coords: {x:store.board.origin[0], y:store.board.origin[1] },
+      dirty: Constants.CANVAS_DIRTY.all
+    })
+  },[canvasRef])
   // #endregion
 
   // #region --------------------------------------------------------------- MOUSE BUTTONS
@@ -471,10 +489,10 @@ const Board= ()=>{
       if((dirty & Constants.CANVAS_DIRTY.coords) || (dirty & Constants.CANVAS_DIRTY.origin)){
         const 
           coords= canvasState.coords,
-          offset= canvasState.offset,
-          origin= [half.x+store.board.origin[0], half.y+store.board.origin[1]]
-        canvasStyle.setProperty("--canvas-coords-x", ((-origin[0] + coords.x+offset.x)|0) + "px" )
-        canvasStyle.setProperty("--canvas-coords-y", ((-origin[1] + coords.y+offset.y)|0) + "px" )
+          offset= canvasState.offset
+
+        canvasStyle.setProperty("--canvas-coords-x", ((-half.x + coords.x+offset.x)|0) + "px" )
+        canvasStyle.setProperty("--canvas-coords-y", ((-half.y + coords.y+offset.y)|0) + "px" )
       }
 
       if(dirty & Constants.CANVAS_DIRTY.style){

@@ -35,15 +35,15 @@ const Navbar = () => {
     }, [profileDropDown]);
   //---------------------------------------------------------------------------------------
 
-
-
-
   function handleAnchor(obj){
     if(store.activePage == Constants.PAGE.landing) {
-      const item= document.querySelector("#" + obj)
-      if(item) {
-        const y= item.getBoundingClientRect().top
-        window.scrollTo({ top: y, left: 0, behavior: "smooth" })
+      const 
+        item= document.querySelector("#" + obj),
+        page= document.querySelector("#landing-main")
+
+      if(item && page) {
+        const y= item.getBoundingClientRect().top - page.getBoundingClientRect().top
+        page.scrollTo({ top: y, left: 0, behavior: "smooth" })
       }
     }
     else nav("/?href=" + obj)

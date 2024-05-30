@@ -146,17 +146,17 @@
   background-size: var(--canvas-background-size);
   
   & .marker-x {
-    width: var(--canvas-size);
+    width: var(--canvas-size-x);
     height: 8px;
     margin-top: -4px;
-    transform: translate(0, var(--canvas-size-half));
+    transform: translate(0, var(--canvas-size-y-half));
   }
 
   & .marker-y {
     width: 8px;
-    height: var(--canvas-size);
+    height: var(--canvas-size-y);
     margin-left: -4px;
-    transform: translate(var(--canvas-size-half), 0);
+    transform: translate(var(--canvas-size-x-half), 0);
   }
 }
 

@@ -13,7 +13,8 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
         frontend: false, 
         pointer: false, 
         language: false, 
-        board: false 
+        board: false,
+        content: false
       },
       errorState: { 
         backend: false, 
@@ -35,7 +36,7 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
       
       // content
       board: null,
-      items: storeDefaults.items,
+      content: null,
 
       // tracking
       millistamp: 0,
@@ -420,7 +421,7 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
         setStore({board: null})
         mergeStore({
           errorState: { board: false },
-          readyState: { board: false }
+          readyState: { board: false, content:false }
         })
         console.log("bye bordo!")
       },
@@ -467,7 +468,6 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
         const board= {
           id: raw.id,
           workspace_id: raw.workspace? raw.workspace[0]?.id?? -1 : -1,
-          workspace: null,
           millistamp: raw.millistamp,
           visibility: 0b0000_0001,
       
@@ -516,6 +516,115 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
         if(res.status==200 && res.data) return res.data
         return null
       },
+      //#endregion
+
+      // #region ----------------------------------------------------------------------------------------- OBJECTS
+
+      /** clear the lodaded objects */
+      clearObjects: async ()=>{
+        setStore({board: null})
+        mergeStore({
+          readyState: { content:false }
+        })
+        console.log("bye bojos!")
+      },
+
+      /** get the content of the current board */
+      objects_board_get: async ()=>{
+        mergeStore({readyState: { board: false }})
+        const res= await getActions().simpleBackendRequest({
+          endpoint:"GET|objects:/board/" + getStore().board?.id?? -1
+        })
+
+        const 
+          raw= res.data??null,
+          content= getActions().getObjectsFromRawData(raw, true)
+
+        setStore({ content: content?? null })
+
+        mergeStore({
+          errorState: { board: content == null },
+          readyState: { content: content != null }
+        })
+
+        if(content) console.log("hello bojos!")
+
+        return content != null
+      },
+
+      getObjectsFromRawData: (raw, full)=>{
+        if(!raw) return null
+
+        const 
+          actions= getActions(),
+          content= {}
+
+        if(raw.lists && raw.lists.length > 0) content.lists= actions.getListsFromRawData(raw.lists, full)
+        if(raw.tags && raw.tags.length > 0) content.tags= actions.getTagsFromRawData(raw.tags, full)
+        if(raw.styles && raw.styles.length > 0) content.styles= actions.getStylesFromRawData(raw.styles, full)
+
+        return content
+      },
+
+      getListsFromRawData: (raw, full)=>{
+        const lists= []
+
+        for(let e of raw){
+          
+          let list= {
+            id: e.id,
+            board: e.board,
+
+            title: e.label,
+            icon: e.icon,
+            
+            users: e.users,
+            tasks: e.users,
+            tags: e.tags,
+            styles: e.styles,
+
+            millistamp: e.millistamp,
+          }
+
+          const settings= e.settings.split('|')
+
+          list.coords= { x: Number(settings[0])|0, y: Number(settings[1])|0 }
+
+          const 
+            sizex= Number(settings[2]),
+            sizey= Number(settings[2])
+
+          list.size= {
+            x: sizex < 0 ? "fit-content" : sizex + "px",
+            y: sizey < 0 ? "fit-content" : sizey + "px"
+          }
+
+          lists.push(list)
+        }
+
+        return lists
+      },
+
+      getTagsFromRawData: (raw, full)=>{
+        const tags= []
+
+        for(let e of raw){
+
+        }
+        
+        return tags
+      },
+
+      getStylesFromRawData: (raw, full)=>{
+        const styles= []
+
+        for(let e of raw){
+
+        }
+        
+        return styles
+      },
+      
       //#endregion
 
       // #region ----------------------------------------------------------------------------------------- DEVELOPER ONLY

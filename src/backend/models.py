@@ -125,14 +125,14 @@ class Workspace(db.Model):
   users_ = db.relationship("User", secondary=users_workspaces_association, back_populates='workspaces_')
 
   def __get_owner(self, deep=0):
-    return self.owner_.serialize() if deep and self.owner_ else self.owner_id,
+    return self.owner_.serialize() if deep > 0 and self.owner_ else self.owner_id,
 
   def __get_rwr(self, deep=0):
-    return self.rwr_.serialize(deep-1) if deep and self.rwr_ else self.rwr_id,
+    return self.rwr_.serialize(deep-1) if deep > 0 and self.rwr_ else self.rwr_id,
 
   def __get_boards(self, deep=0):
-    b= self.boards_
-    return ([v.serialize(deep-1) for v in b] if b else []) if deep > 0 else ([v.id for v in b] if b else [])
+    e= self.boards_
+    return ([v.serialize(deep-1) for v in e] if e else []) if deep > 0 else ([v.id for v in e] if e else [])
 
   def serialize(self, deep=0):
 
@@ -143,6 +143,7 @@ class Workspace(db.Model):
       "settings": self.settings,
       "rwr": self.__get_rwr(deep),
       "owner": self.__get_owner(deep),
+      "users": [v.id for v in self.users_] if self.users_ else [],
       "boards": self.__get_boards(deep),
       "archived": self.archived,
       "millistamp": self.millistamp
@@ -187,15 +188,34 @@ class Board(db.Model):
   users_ = db.relationship("User", secondary=users_boards_association, back_populates='boards_')
 
   def __get_rwr(self, deep=0):
-    return self.rwr_.serialize(deep-1) if deep and self.rwr_ else self.rwr_id,
+    return self.rwr_.serialize(deep-1) if deep > 0 and self.rwr_ else self.rwr_id,
 
-  def __get_owner(self, deep):
-    return self.owner_.serialize() if deep and self.owner_ else self.owner_id,
+  def __get_owner(self, deep=0):
+    return self.owner_.serialize() if deep > 0 and self.owner_ else self.owner_id,
 
-  def __get_workspace(self, deep):
-    return self.workspace_.serialize() if deep and self.workspace_ else self.workspace_id,
+  def __get_workspace(self, deep=0):
+    return self.workspace_.serialize() if deep > 0 and self.workspace_ else self.workspace_id,
 
-  def serialize(self, deep=False):
+  def __get_lists(self, deep=0):
+    e= self.lists_
+    return ([v.serialize(deep-1) for v in e] if e else []) if deep > 0 else ([v.id for v in e] if e else [])
+
+  def __get_tags(self, deep=0):
+    e= self.tags_
+    return ([v.serialize(deep-1) for v in e] if e else []) if deep > 0 else ([v.id for v in e] if e else [])
+
+  def __get_styles(self, deep=0):
+    e= self.styles_
+    return ([v.serialize(deep-1) for v in e] if e else []) if deep > 0 else ([v.id for v in e] if e else [])
+
+  def serialize_content(self, deep=0):
+    return {
+      "lists": self.__get_lists(deep),
+      "tags": self.__get_tags(deep),
+      "styles": self.__get_styles(deep)
+    }
+
+  def serialize(self, deep=0):
     return {
       "id": self.id,
       "name": self.name,
@@ -205,6 +225,7 @@ class Board(db.Model):
       "settings": self.settings,
       "rwr": self.__get_rwr(deep),
       "owner": self.__get_owner(deep),
+      "users": [v.id for v in self.users_] if self.users_ else [],
       "workspace": self.__get_workspace(deep),
       "archived": self.archived,
       "millistamp": self.millistamp
@@ -239,21 +260,26 @@ class List(db.Model):
   tasks_ = db.relationship("Task", back_populates="list_")
 
   def __get_rwr(self, deep=0):
-    return self.rwr_.serialize(deep-1) if deep and self.rwr_ else self.rwr_id,
+    return self.rwr_.serialize(deep-1) if deep > 0 and self.rwr_ else self.rwr_id,
 
-  def __get_board(self, deep):
-    return self.board_.serialize() if deep and self.board_ else self.board_id,
+  def __get_tasks(self, deep=0):
+    e= self.tasks_
+    return ([v.serialize(deep-1) for v in e] if e else []) if deep > 0 else ([v.id for v in e] if e else [])
 
   def serialize(self, deep=0):
     return {
       "id": self.id,
       "title": self.title,
-      "icon": get_public_link(self.icon) if not '://' in self.icon else self.icon,
+      "icon": (get_public_link(self.icon) if not '://' in self.icon else self.icon) if self.icon else None,
       "settings": self.settings,
       "rwr": self.__get_rwr(deep),
-      "board": self.__get_board(deep),
+      "board": self.board_id,
+      "tasks": self.__get_tasks(deep),
+      "users": [v.id for v in self.users_] if self.users_ else [],
+      "tags": [v.id for v in self.tags_] if self.tags_ else [],
+      "styles": [v.id for v in self.styles_] if self.styles_ else [],
       "archived": self.archived,
-      "millistamp": self.millistamp
+      "millistamp": self.millistamp,
     }
   def __repr__(self): return f'<List {self.id}::{self.label}>'
 #endregion
@@ -284,18 +310,19 @@ class Task(db.Model):
   styles_ = db.relationship('Style', secondary=styles_tasks_association, back_populates='tasks_')
 
   def __get_rwr(self, deep=0):
-    return self.rwr_.serialize(deep-1) if deep and self.rwr_ else self.rwr_id,
-
-  def __get_list(self, deep):
-    return self.list_.serialize() if deep and self.list_ else self.list_id,
+    return self.rwr_.serialize(deep-1) if deep > 0 and self.rwr_ else self.rwr_id,
 
   def serialize(self, deep=0):
     return {
       "id": self.id,
       "label": self.label,
       "description": self.description,
+      "icon": (get_public_link(self.icon) if not '://' in self.icon else self.icon) if self.icon else None,
       "rwr": self.__get_rwr(deep),
-      "list": self.__get_list(deep),
+      "list": self.list_id,
+      "users": [v.id for v in self.users_] if self.users_ else [],
+      "tags": [v.id for v in self.tags_] if self.tags_ else [],
+      "styles": [v.id for v in self.styles_] if self.styles_ else [],
       "due_date": self.due_date,
       "archived": self.archived,
       "millistamp": self.millistamp
