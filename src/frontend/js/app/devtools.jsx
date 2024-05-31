@@ -138,7 +138,7 @@ const DevTools = () => {
   
   // ------------------------------------------------------------------- RETURN
   return (
-		<div className={"devtools fixed text-center text-white text-xs" + _DEVTOOL_POSITIONS[_devToolPosition][0]}>
+		<div className={"hidden devtools fixed text-center text-white text-xs" + _DEVTOOL_POSITIONS[_devToolPosition][0]}>
       <div className={"flex" + _DEVTOOL_POSITIONS[_devToolPosition][2]}>
         <div className={"flex" + _DEVTOOL_POSITIONS[_devToolPosition][1]}>
           <button className="bg-slate-400 px-0.5 rounded-md w-7 aspect-square" onClick={toggle_devTools}>{_devToolState ? "❌" : "🛠️"}</button>
