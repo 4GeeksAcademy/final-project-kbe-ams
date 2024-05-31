@@ -1,7 +1,7 @@
 import React from 'react'
 import { Context } from '../../store/appContext.jsx'
 
-const ContextMenu= ({ mid, coords, items, eventback })=>{
+const ContextMenu= ({ mid, coords, items, eventback, detailback })=>{
 
   const
     { language }= React.useContext(Context),
@@ -34,7 +34,7 @@ const ContextMenu= ({ mid, coords, items, eventback })=>{
   function _preventContextualMenu(e){ if(e.target=== selfRef.current || selfRef.current?.contains(e.target)) e.preventDefault() }
 
   function handleItemClick(id){
-    window.dispatchEvent(new CustomEvent(eventback, { detail: id }))
+    window.dispatchEvent(new CustomEvent(eventback, { detail: { id, ...detailback }}))
   }
 
   // #endregion
@@ -45,7 +45,7 @@ const ContextMenu= ({ mid, coords, items, eventback })=>{
         { items && items.map((e,i)=>
           e ? 
             !e.hidden && 
-            <li key={`ctx-${i}`} onClick={e.enabled ? ()=>{handleItemClick(e.id)} : null} className={"min-w-40 px-1 rounded-sm py-2px my-px " + (e.enabled ? "hover:bg-gray-300 dark:hover:bg-zinc-700" : "text-gray-400 dark:text-gray-700")}>
+            <li key={`ctx-${i}`} onClick={e.enabled ? ()=>{handleItemClick(e.id)} : null} className={"min-w-40 px-1 rounded-sm py-2px my-px " + (e.enabled ? "hover:bg-gray-300 dark:hover:bg-zinc-700" : "text-gray-400 dark:text-gray-600")}>
               {language.get(e.label)}
             </li>
           :

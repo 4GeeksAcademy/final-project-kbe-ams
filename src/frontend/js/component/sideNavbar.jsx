@@ -1,7 +1,9 @@
 import React, { useState } from "react"
 import { useNavigate } from "react-router-dom";
+import { Context } from "../store/appContext.jsx";
 
 const SideNavbar = ({workspaces, boards}) => {
+  const { language }= React.useContext(Context)
 
     const nav = useNavigate();
    
@@ -19,7 +21,7 @@ const SideNavbar = ({workspaces, boards}) => {
 				<ul>
 					{workspaces && workspaces.map((e, i)=>{
 								return <li onClick={()=>nav(`/workspace/${e.id}`)} key={`li-ws-${i}`} className="flex ite ms-center hover:bg-gray-800 rounded-lg cursor-pointer p-3">
-											<p className="text-sm f-body">{e.title}</p>
+											<p className="text-sm f-body">{language.test(e.title)}</p>
 										</li>
 							})}
 				</ul>
@@ -28,7 +30,7 @@ const SideNavbar = ({workspaces, boards}) => {
 				<ul>
 					{boards && boards.map((e, i)=>{
 								return <li onClick={()=>nav(`/board/${e.id}`)} key={`li-bc-${i}`} className="flex items-center hover:bg-gray-800 rounded-lg cursor-pointer p-3">
-											<p className="text-sm f-body">{e.name}</p>
+											<p className="text-sm f-body">{language.test(e.name)}</p>
 										</li>	
 							})}
 

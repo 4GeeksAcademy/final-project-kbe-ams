@@ -21,7 +21,10 @@ def handle_workspaces_user():
   user, error= api_utils.get_user_by_identity()
   if error: return error
 
-  last= db.session.query(Workspace).filter(Workspace.id== user.last_workspace_id).first()
+  last_id= user.last_workspace_id
+  last, error= get_workspace_by_id(last_id)
+  if error: last= None
+
   result= {
     "last": last.serialize() if last else None,
     "owned": [v.serialize() for v in user.workspaces_owned_] if user.workspaces_owned_ else [],
@@ -42,7 +45,7 @@ def handle_workspaces_instance_create():
   if error: return error
 
   workspace= Workspace(
-    title='/default.title-workspace',
+    title='çdefault.title-workspace',
     thumbnail= DEFAULT_THUMBNAIL['workspace'],
     owner_id= user.id,
     millistamp= get_current_millistamp()
@@ -141,7 +144,7 @@ def handle_workspaces_healthcheck():
 # ---------------------------------------------------------------------------- HELPERS ----------------------------------------------------------------------------
 
 def get_workspace_by_id(wid):
-  if not wid or wid < 1: return api_utils.response(400, f"invalid workspace id: {wid}")
-  workspace= db.session.query(Workspace).get(wid)
+  if not wid or wid < 1: return None, api_utils.response(400, f"invalid workspace id: {wid}")
+  workspace= db.session.get(Workspace, wid)
   if not workspace: return None, api_utils.response(404, "workspace not found")
   return workspace, None

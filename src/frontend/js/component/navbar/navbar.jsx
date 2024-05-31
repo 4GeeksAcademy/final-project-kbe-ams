@@ -1,10 +1,10 @@
 import React, { useRef, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
-import { Context } from "../store/appContext.jsx"
+import { Context } from "../../store/appContext.jsx"
 
 import { Tooltip as ReactTooltip } from "react-tooltip";
 
-import Constants from "../app/constants.js"
+import Constants from "../../app/constants.js"
 import NavbarBreadcumb from "./navbarBreadcumb.jsx"
 import ProfileDropDown from "./profileDropDown.jsx"
 

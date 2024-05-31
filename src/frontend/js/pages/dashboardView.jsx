@@ -30,7 +30,7 @@ const DashboardView = () => {
     set_boards([ ..._boards?.owned??[], ..._boards?.active??[] ])
     
     actions.setNavbarBreadcumb([
-      ["/title.dashboard", "/dashboard"]
+      ["çtitle.dashboard", "/dashboard"]
     ])
       
   } handle() },[])

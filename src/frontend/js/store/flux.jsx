@@ -25,7 +25,11 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
       },
 
       activePage: null,
-      navbarBreadcumb: null,
+      siteData: {
+        breadcumb: null,
+        showModal: 0,
+        modalReturn: null
+      },
 
       // user
       userPrefs: storeDefaults.userPrefs,
@@ -43,12 +47,15 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
       dirty: 0
 		},
     language: {
+      test: (str)=>{
+        return str && str[0]=='ç' ? getLanguage().get(str.substring(1)) : str
+      },
       get: (...path)=>{
         const pathname= _getLanguagePath(path)
         try {
           let cur_language= getLanguage()
           for(let p of pathname) {
-            cur_language= cur_language[p]
+            cur_language= cur_language[p.toLowerCase()]
             if(!cur_language) break
           }
           if(cur_language) return cur_language
@@ -165,7 +172,14 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
 
       // #region ----------------------------------------------------------------------------------------- PAGE BEHAVIOUR
 
-      setActivePage: (idx)=> setStore({ activePage: idx }),
+      setActivePage: (idx)=> {setStore({ activePage: idx })},
+
+      setShowModal: (idx)=> {mergeStore({ siteData: { showModal: idx }})},
+      getModalReturn: ()=> {
+        const data= getStore().siteData.modalReturn
+        mergeStore({ siteData: { showModal: 0, modalReturn: null }})
+        return data
+      },
 
       setPointerReady: (state)=> { mergeStore({ readyState: { pointer: state }})},
 
@@ -173,8 +187,12 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
       setStoreDirty: (state)=> { setStore({ dirty: getStore().dirty | state })},
       unsetStoreDirty: (state)=> { setStore({ dirty: (getStore().dirty | state) ^ state })},
 
-      setNavbarBreadcumb: (element)=> {
-        setStore({navbarBreadcumb: element ? Array.isArray(element[0]) ? element : [element] : null})
+      setNavbarBreadcumb: (element, soft=false)=> {
+        if(soft){
+          const bcumb= getStore().siteData.breadcumb
+          if(bcumb != null && bcumb.length > element.length) return
+        }
+        mergeStore({siteData : {breadcumb: element ? Array.isArray(element[0]) ? element : [element] : null}})
       },
 
       getTimestamp: async(subdomain, id)=>{
@@ -487,7 +505,7 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
         const settings= raw.settings.split('|')
 
         board.size= { x: Number(settings[0])|0, y: Number(settings[1])|0 }
-        board.xhalf= { x: board.size.x * .475, y: board.size.y * .475 }
+        board.xhalf= { x: board.size.x * .5, y: board.size.y * .5 }
         board.half= { x: board.size.x * .5, y: board.size.y * .5 }
         board.origin= [Number(settings[2])|0, Number(settings[3])|0, Number(settings[4]) ]
         board.background= settings[5][0]==="#" ? settings[5] : `url('${settings[5]}')`
@@ -538,7 +556,7 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
 
         const 
           raw= res.data??null,
-          content= getActions().getObjectsFromRawData(raw, true)
+          content= getActions().getObjectsFromRawData(raw)
 
         setStore({ content: content?? null })
 
@@ -552,77 +570,101 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
         return content != null
       },
 
-      getObjectsFromRawData: (raw, full)=>{
+      /** create a list */
+      objects_instance_list_create: async (coords)=>{
+        const res= await getActions().simpleBackendRequest({
+          endpoint:"POST|objects:/instance-list",
+          body: {
+            'board_id': getStore().board.id,
+            'coords': [-coords.x, -coords.y]
+          }
+        })
+        if(res.status==200 && res.data) {
+          
+          const list= getActions().getListFromRawData(res.data, true)
+
+          const cur_lists= getStore().content?.lists
+          if(!cur_lists) mergeStore({content: {lists: [list]}})
+          else mergeStore({content: {lists: cur_lists.concat([list])}})
+
+          return true
+        }
+        return false
+      },
+
+      /** create a task */
+      objects_instance_task_create: async (id, position=-1)=>{
+        const res= await getActions().simpleBackendRequest({
+          endpoint:"POST|objects:/instance-task",
+          body: {
+            'list_id': id,
+            ...(position >= 0 ? {'position': position} : {})
+          }
+        })
+        if(res.status==200 && res.data) return res.data
+        return null
+      },
+
+      getObjectsFromRawData: (raw)=>{
         if(!raw) return null
 
         const 
           actions= getActions(),
-          content= {}
+          content= {
+            lists: [], 
+            tags: [], 
+            styles: []
+          }
 
-        if(raw.lists && raw.lists.length > 0) content.lists= actions.getListsFromRawData(raw.lists, full)
-        if(raw.tags && raw.tags.length > 0) content.tags= actions.getTagsFromRawData(raw.tags, full)
-        if(raw.styles && raw.styles.length > 0) content.styles= actions.getStylesFromRawData(raw.styles, full)
+        if(raw.lists && raw.lists.length > 0) {
+          for(let e of raw.lists) content.lists.push(actions.getListFromRawData(e))
+        }
+        if(raw.tags && raw.tags.length > 0) {
+          for(let e of raw.tags) content.tags.push(actions.getTagFromRawData(e))
+        }
+        if(raw.styles && raw.styles.length > 0) {
+          for(let e of raw.styles) content.styles.push(actions.getStyleFromRawData(e))
+        }
 
         return content
       },
 
-      getListsFromRawData: (raw, full)=>{
-        const lists= []
-
-        for(let e of raw){
-          
-          let list= {
-            id: e.id,
-            board: e.board,
-
-            title: e.label,
-            icon: e.icon,
-            
-            users: e.users,
-            tasks: e.users,
-            tags: e.tags,
-            styles: e.styles,
-
-            millistamp: e.millistamp,
-          }
-
-          const settings= e.settings.split('|')
-
-          list.coords= { x: Number(settings[0])|0, y: Number(settings[1])|0 }
-
-          const 
-            sizex= Number(settings[2]),
-            sizey= Number(settings[2])
-
-          list.size= {
-            x: sizex < 0 ? "fit-content" : sizex + "px",
-            y: sizey < 0 ? "fit-content" : sizey + "px"
-          }
-
-          lists.push(list)
+      getListFromRawData: (raw)=>{
+        let list= {
+          id: raw.id,
+          board: raw.board,
+          title: raw.title,
+          icon: raw.icon,
+          users: raw.users,
+          tasks: raw.tasks,
+          tags: raw.tags,
+          styles: raw.styles,
+          millistamp: raw.millistamp,
         }
 
-        return lists
+        const settings= raw.settings.split('|')
+
+        list.coords= { x: Number(settings[0])|0, y: Number(settings[1])|0 }
+
+        const 
+          sizex= Number(settings[2]),
+          sizey= Number(settings[2])
+
+        list.size= {
+          x: sizex < 0 ? "fit-content" : sizex + "px",
+          y: sizey < 0 ? "fit-content" : sizey + "px"
+        }
+        return list
       },
 
-      getTagsFromRawData: (raw, full)=>{
-        const tags= []
-
-        for(let e of raw){
-
-        }
-        
-        return tags
+      getTagFromRawData: (raw)=>{
+        let tag= {}
+        return tag
       },
 
-      getStylesFromRawData: (raw, full)=>{
-        const styles= []
-
-        for(let e of raw){
-
-        }
-        
-        return styles
+      getStyleFromRawData: (raw)=>{
+        let style= {}
+        return style
       },
       
       //#endregion
@@ -697,7 +739,7 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
               id: 0,
               username: "paco69",
               displayname: "Paco Fiestas",
-              email: "paquitosexy69@gmail.com",
+              email: "paquitosexy69@fakemail.com",
               last_visits: [0, 0],
               avatar: "https://api.dicebear.com/8.x/pixel-art/png?seed=paco",
               fake: true
@@ -711,11 +753,12 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
       loadDevPrefs:()=>{
         const cur_prefs= Utils.getCookie("devPrefs")
         console.log("devPrefs Cookie: ", cur_prefs)
-        if(cur_prefs && cur_prefs.length==3){
+        if(cur_prefs && cur_prefs.length==4){
           const new_devPrefs= {
             showState: cur_prefs[0] != "0",
             panelPosition: parseInt(cur_prefs[1]),
-            devRender: cur_prefs[2] != "0"
+            devRender: cur_prefs[2] != "0",
+            toolsMode: parseInt(cur_prefs[3])
           }
           setStore({ devPrefs: new_devPrefs })
         }
@@ -727,6 +770,7 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
           cur_prefs.showState ? '1' : '0',
           cur_prefs.panelPosition.toString(),
           cur_prefs.devRender ? '1' : '0',
+          cur_prefs.toolsMode.toString(),
         ].join("")
         Utils.setCookie("devPrefs", data, [30,0,0], "/", Constants.COOKIE_SAMESITE_STRICT )
       },

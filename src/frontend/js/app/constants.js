@@ -49,6 +49,7 @@ const Constants= Object.freeze({
   DEVPREFS_DEVRENDER: "devRender",
   DEVPREFS_FAKEAUTH: "fakeAuth",
   DEVPREFS_FAKEOWNER: "fakeOwner",
+  DEVPREFS_TOOLSMODE: "toolsMode",
 
   USERPREFS_DARKMODE: "darkMode",
   USERPREFS_LANGUAGE: "language",
@@ -113,7 +114,8 @@ const Constants= Object.freeze({
     display:      0b0000_0000_0111_0000,
     all:          0b0000_0000_0111_1111,
 
-    data:         0b1000_0000_0000_0000 // require database reload
+    upload:       0b0010_0000_0000_0000,  // require database upload
+    data:         0b0100_0000_0000_0000   // require database reload
   },
 
   ITEMTYPE: {
@@ -144,7 +146,8 @@ const Constants= Object.freeze({
     display:      0b0000_0000_0000_1100,
     all:          0b0000_0000_0000_1111,
 
-    data:         0b1000_0000_0000_0000 // require database reload
+    upload:       0b0010_0000_0000_0000,  // require database upload
+    data:         0b0100_0000_0000_0000   // require database reload
   }
 })
 

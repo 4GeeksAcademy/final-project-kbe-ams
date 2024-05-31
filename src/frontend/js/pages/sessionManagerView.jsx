@@ -1,7 +1,7 @@
 import React, {useContext, useEffect, useState} from "react"
 import Constants from "../app/constants"
-import SessionLogin from "../component/sessionLogin.jsx"
-import SessionLogout from "../component/sessionLogout.jsx";
+import SessionLogin from "../component/sessionmanager/sessionLogin.jsx"
+import SessionLogout from "../component/sessionmanager/sessionLogout.jsx";
 
 
 /* import { Context } from "../store/appContext"; */

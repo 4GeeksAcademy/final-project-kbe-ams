@@ -241,7 +241,7 @@ export const useGlobalPointerHook= ()=>{
     if(e === hover) return 0
     if(e.contains(hover)) return Array.from(e.children).includes(hover) ? 1 : 2
     if(hover.contains(e)) return Array.from(hover.children).includes(e) ? -1 : -2
-    if(hover.parentNode.contains(e)) return 3
+    if(hover.parentNode?.contains(e)) return 3
     return -3
   }
 

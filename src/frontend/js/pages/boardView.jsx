@@ -49,7 +49,7 @@ const BoardView= ()=>{
         window.removeEventListener("k-contextmenu", onContexMenu)
       }
     }
-  },[self.current, bid])
+  },[selfRef.current, bid])
 
   // state updates
   React.useEffect(()=> { async function handle(){
@@ -59,7 +59,7 @@ const BoardView= ()=>{
         actions.clearBoard()
       } 
       actions.setNavbarBreadcumb([ 
-        ["/title.dashboard", "/dashboard"]
+        ["çtitle.dashboard", "/dashboard"]
       ])
       set_localState(_READYSTATE.requireLoad)
     }
@@ -67,7 +67,7 @@ const BoardView= ()=>{
       const idnum= Number(bid??"-1")
       if(idnum > 0) {
         set_localState(_READYSTATE.loading)
-        console.log("loading board")
+        console.log("loading bololó")
         const result= await actions.boards_instance_get(idnum) // board gets into 'store.board'
         set_localState(result ? _READYSTATE.ready: _READYSTATE.errored)
       }
@@ -78,27 +78,27 @@ const BoardView= ()=>{
     }
     else if(localState == _READYSTATE.loading){
       actions.setNavbarBreadcumb([ 
-        ["/title.dashboard", "/dashboard"],
-        ["/common.loading", null] 
+        ["çtitle.dashboard", "/dashboard"],
+        ["çcommon.loading", null] 
       ])
     }
     else if(localState === _READYSTATE.ready){
       actions.setNavbarBreadcumb(
         store.board.workspace_id != -1 ?
         [
-          ["/title.dashboard", "/dashboard"],
+          ["çtitle.dashboard", "/dashboard"],
           [store.board.workspace.title, `/workspace/${store.board.workspace_id}`],
           [store.board.name, null]
         ] : [
-          ["/title.dashboard", "/dashboard"],
+          ["çtitle.dashboard", "/dashboard"],
           [store.board.name, null]
         ]
       )
     }
     else if(localState == _READYSTATE.errored){
       actions.setNavbarBreadcumb([ 
-        ["/title.dashboard", "/dashboard"],
-        ["/error.boardnotfound", null] 
+        ["çtitle.dashboard", "/dashboard"],
+        ["çerror.boardnotfound", null] 
       ])
     }
   } handle() },[localState])
@@ -130,7 +130,7 @@ const BoardView= ()=>{
     if(props) {
       await Utils.waitUntil(()=>contextMenu===null)
       await Utils.wait(50)
-      set_contextMenu(<ContextMenu {...props} />)
+      set_contextMenu(<ContextMenu {...props}/>)
     }
   }
 
@@ -140,8 +140,13 @@ const BoardView= ()=>{
         <>
           { localState== _READYSTATE.ready ?
             <>
-              <div className="pointer-skip absolute inset-0 flex">
-                <Toolbar />
+              <div className="pointer-events-none absolute inset-0 flex">
+                <div className="flex flex-col w-full pointer-events-none justify-between relative">
+                  <Toolbar />
+                  {/* <div className="trashbin flex size-60 ml-auto bg-red-400 bg-opacity-15">
+                    <i className="fa-solid fa-trash-can mt-auto mb-16 ml-auto mr-16 opacity-60"/>
+                  </div> */}
+                </div>
                 <SidePanel />
               </div>
               <Board/>

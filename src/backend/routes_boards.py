@@ -21,7 +21,12 @@ def handle_boards_user():
   user, error= api_utils.get_user_by_identity()
   if error: return error
 
-  last= db.session.query(Board).filter(Board.id== user.last_board_id).first()
+  last_id= user.last_board_id
+  last, error= get_board_by_id(last_id)
+  if error: last= None
+
+  print(last)
+
   result= {
     "last": last.serialize() if last else None,
     "owned": [v.serialize() for v in user.boards_owned_] if user.boards_owned_ else [],
@@ -38,8 +43,6 @@ def handle_boards_user():
 @api_utils.endpoint_safe( content_type="application/json" )
 def handle_boards_instance_create(json):
 
-  print("b")
-  
   user, error= api_utils.get_user_by_identity()
   if error: return error
 
@@ -47,8 +50,8 @@ def handle_boards_instance_create(json):
   if wid != None and wid < 1: return api_utils.response(400, f"invalid workspace_id: {wid}")
 
   board= Board(
-    name='/default.title-board',
-    description="/placeholder.description",
+    name='çdefault.title-board',
+    description="çplaceholder.description",
     icon= DEFAULT_ICON['board'],
     thumbnail= DEFAULT_THUMBNAIL['board'],
     owner_id= user.id,
@@ -71,17 +74,20 @@ def handle_boards_instance_get(id):
   if error: return error
 
   bid= parse_int(id, None)
-  if not bid or bid < 1: return api_utils.response(400, f"invalid board id: {bid}")
-
   board, error= get_board_by_id(bid)
   if error: return error
 
   if user.id != board.owner_id:
     if not user.boards_.filter(Board.id== bid).first(): return api_utils.response(403, "user has no permission to get board")
+
+  # set it as last visited
+  user.last_board_id= board.id
+  if board.workspace_ != None: user.last_workspace_id= board.workspace_.id
+  db.session.commit()
   
   return api_utils.response_200(board.serialize(deep=1))
 
-# delete a workspace (mark it as )
+# delete a workspace (mark it as archived)
 @boards.route('/delete', methods=['POST'])
 @jwt_required()
 @api_utils.endpoint_safe( content_type="application/json", required_props=("id") )
@@ -91,7 +97,6 @@ def handle_boards_instance_delete(json):
   if error: return error
 
   bid= parse_int(json['id'], None)
-
   board, error= get_board_by_id(bid)
   if error: return error
 
@@ -104,6 +109,24 @@ def handle_boards_instance_delete(json):
   api_utils.delete_boards([board]) # this do commit()
   
   return api_utils.response(200, "deleted")
+
+# get specified boards (bare)
+@boards.route('/bare', methods=['POST'])
+@jwt_required()
+@api_utils.endpoint_safe( content_type="application/json", required_props=("ids") )
+def handle_boards_bare(json):
+  
+  _, error= api_utils.get_user_by_identity()
+  if error: return error
+
+  boards= []
+  for id in json['ids']:
+    bid= parse_int(id, None)
+    board, error= get_board_by_id(bid)
+    if error: return error
+    boards.append(board.serialize())
+  
+  return api_utils.response_200(boards)
   
 # -------------------------------------- /fetch
 # get the 'types' ids that require an update for a given 'board_id' and 'millistamp', gets everything if 'millistamp' < 0
@@ -181,8 +204,8 @@ def handle_boards_healthcheck():
 # ---------------------------------------------------------------------------- HELPERS ----------------------------------------------------------------------------
 
 def get_board_by_id(bid):
-  if not bid or bid < 1: return api_utils.response(400, f"invalid board id: {bid}")
-  board= db.session.query(Board).get(bid)
+  if not bid or bid < 1: return None, api_utils.response(400, f"invalid board id: {bid}")
+  board= db.session.get(Board, bid)
   if not board: return None, api_utils.response(404, "board not found")
   return board, None
 

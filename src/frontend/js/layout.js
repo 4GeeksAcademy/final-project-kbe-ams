@@ -4,18 +4,15 @@ import Constants from "./app/constants.js"
 
 import DevTools from "./app/devtools.jsx"
 
-import Navbar from "./component/navbar.jsx"
+import Navbar from "./component/navbar/navbar.jsx"
 
 import LandingView from "./pages/landingView.jsx" // Landing page when logged out (correct naming for old "home")
 import SessionManagerView from "./pages/sessionManagerView.jsx" // signup / login / forgot password / logout screen / account removed screen
 
 import SettingsView from "./pages/settingsView.jsx" // profile/account settings
-//import ProfileView from "./pages/profileView.jsx" // user's public profile
 
 import DashboardView from "./pages/dashboardView.jsx" // landing page when logged in
 import WorkspaceView from "./pages/workspaceView.jsx" // workspace manager
-//import TeamView from "./pages/teamView.jsx" // team manager
-//import ProjectView from "./pages/projectView.jsx" // project view
 import BoardView from "./pages/boardView.jsx" // board view
 
 import Contact from "./pages/contact.jsx" //contact view

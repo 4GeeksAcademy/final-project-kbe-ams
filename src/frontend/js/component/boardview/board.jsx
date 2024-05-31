@@ -14,6 +14,14 @@ const
   _ZOOM_LEVELS= Utils.generateZoomLevels(.025, 10.0, 48, 24), // min, max, steps, 1.0 location
   _CONTEXTMENU_CALLBACK_EVENT= "k-oncontextaction"
 
+const _READYSTATE= Object.freeze({
+  check: "check",
+  requireLoad: "requireload",
+  loading: "loading",
+  errored: "errored",
+  ready: "ready"
+})
+
 /**
  *  -- Board --
  * 
@@ -25,8 +33,10 @@ const Board= ()=>{
 
   const
     { language, store, actions }= React.useContext(Context),
+    [ localState, set_localState ]= React.useState(-1),
     [ pointer, pointerUtils ]= getPointerHook(),
-    canvasRef= React.useRef(null)
+    canvasRef= React.useRef(null),
+    selfRef= React.useRef(null)
 
   const
     [ canvasState, _scs ]= React.useState({
@@ -49,49 +59,36 @@ const Board= ()=>{
   function merge_canvasState(new_state){ _scs({ ...Object.assign(canvasStateRef.current, { ...new_state, millistamp: Date.now() })})}
   function set_currentAction(new_action){ _scs({ ...Object.assign(canvasStateRef.current, { lastaction: canvasStateRef.current.action, action: new_action, millistamp: Date.now() })})}
 
-  React.useEffect(()=>{ async function handle(){
+  React.useEffect(()=>{
+    if(canvasRef.current) {
+      set_localState(_READYSTATE.check)
+    }
+  },[canvasRef.current])
 
-    if(store.readyState.board){
-
+  // state updates
+  React.useEffect(()=> { async function handle(){
+    if(localState== _READYSTATE.check){
       merge_canvasState({
         coords: {x:store.board.origin[0], y:store.board.origin[1] },
         dirty: Constants.CANVAS_DIRTY.all
       })
-
-      await actions.objects_board_get()
+      set_localState(_READYSTATE.requireLoad)
     }
-  } handle() },[store.readyState.board])
-  
-  React.useEffect(()=>{ async function handle(){
-
-    if(store.items){
-  
-      const content= store.board.content
-      if(content?.length > 0){
-
-        itemUtils.current= Array(content.length)
-
-        const react= content.map((c,i)=>{
-
-          const item= store.items.find(e=>e.id===c)
-          if(item) {
-            return <List key={`${item.id}|${item.bid}`} id={item.id} bref={[itemUtils, i]} {...item.props} />
-          }
-        }).filter(e=>e!=null)
-        set_childItems(react)
-        console.log(`board contains ${react.length} items`)
-      }
+    else if(localState== _READYSTATE.requireLoad) {
+      set_localState(_READYSTATE.loading)
+      //console.log("loading content")
+      const result= await actions.objects_board_get() // content gets into 'store.content'
+      set_localState(result ? _READYSTATE.ready: _READYSTATE.errored)
     }
-    else console.log(`empty board with id: ${store.board.id}`)
-
-  } handle() },[store.readyState.content])
- 
-  React.useEffect(()=>{ 
-    merge_canvasState({
-      coords: {x:store.board.origin[0], y:store.board.origin[1] },
-      dirty: Constants.CANVAS_DIRTY.all
-    })
-  },[canvasRef])
+    else if(localState == _READYSTATE.loading){
+    }
+    else if(localState === _READYSTATE.ready){
+      merge_canvasState({ dirty: Constants.CANVAS_DIRTY.data })
+    }
+    else if(localState == _READYSTATE.errored){
+      console.log("error getting board data")
+    }
+  } handle() },[localState])
   // #endregion
 
   // #region --------------------------------------------------------------- MOUSE BUTTONS
@@ -105,19 +102,9 @@ const Board= ()=>{
 
     // context menu open/relocate
 
-    if(!checkAction()){
-      
-      if(zsort===0 && click.button=== Constants.MOUSE_BTN_RIGHT) {
-        setContextMenu(0, click.origin)
-        return
-      }
-      else if(canvasState.contextmenu != -1) {
-        const ctxz= pointerUtils.getZsort(document.body.querySelector(`[data-mid="${canvasState.contextmenu}"]`))
-        if(ctxz < 0 || ctxz === 3){
-          setContextMenu(-1)
-          return
-        }
-      }
+    if(!checkAction() && zsort===0 && click.button=== Constants.MOUSE_BTN_RIGHT) {
+      setContextMenu(0, click.origin)
+      return
     }
 
     if(checkAction()) {
@@ -125,8 +112,16 @@ const Board= ()=>{
       return
     }
     
-    if(zsort===0 || click.button=== Constants.MOUSE_BTN_MIDDLE) return _process_board_click(click, buttons, zsort)
-    else if(click.button=== Constants.MOUSE_BTN_LEFT) return _process_item_click(click, buttons)
+    if(zsort===0 || click.button=== Constants.MOUSE_BTN_MIDDLE) _process_board_click(click, buttons, zsort)
+    else if(click.button!== Constants.MOUSE_BTN_MIDDLE) _process_item_click(click, buttons)
+
+    if(canvasState.contextmenu != -1) {
+      const ctxz= pointerUtils.getZsort(document.body.querySelector(`[data-mid="${canvasState.contextmenu}"]`))
+      if(ctxz < 0 || ctxz === 3){
+        setContextMenu(-1)
+        return
+      }
+    }
   
   } handle() },[pointer.current.notify.onmousedown])
 
@@ -190,16 +185,10 @@ const Board= ()=>{
       if(pointerUtils.getZsort(canvasRef.current) === 0){
         const
           xhalf= store.board.xhalf, // .475, not half
-          cur_coords= canvasState.coords,
-          mus_coords= pointer.current.coords,
-          viewFactor= [ window.innerWidth*.5, window.innerHeight*.5 ],
-          mus_point= [ (mus_coords.x - viewFactor[0]) * -1.0, (mus_coords.y - viewFactor[1]) * -1.0 ],
-
-          zoominv= 1/_ZOOM_LEVELS[canvasState.zoom],
-
+          canvasCoords= pointerToCanvasCoords(pointer.current.coords),
           new_coords= {
-            x: Utils.clamp(cur_coords.x + (mus_point[0] * zoominv | 0), -xhalf.x, xhalf.x),
-            y: Utils.clamp(cur_coords.y + (mus_point[1] * zoominv | 0), -xhalf.y, xhalf.y),
+            x: Utils.clamp(canvasCoords.x, -xhalf.x, xhalf.x),
+            y: Utils.clamp(canvasCoords.y, -xhalf.y, xhalf.y),
           }
 
         merge_canvasState({
@@ -210,44 +199,88 @@ const Board= ()=>{
     }
   },[pointer.current.notify.onmousedouble])
 
-  /** processes a click on a board item, only left button allowed */
+  function pointerToCanvasCoords(mus_coords){
+    const
+      cur_coords= canvasState.coords,
+      rect= selfRef.current.getBoundingClientRect(),
+      ratio= 1/window.innerHeight * window.innerWidth,
+      viewFactor= [ window.innerWidth*.5, window.innerHeight*.5 ],
+      mus_point= [ (mus_coords.x - rect.x - viewFactor[0]) * -1.0, (mus_coords.y - rect.y - viewFactor[1]) * -1.0 ],
+      zoominv= 1/_ZOOM_LEVELS[canvasState.zoom]
+
+    return {
+      x: cur_coords.x + (mus_point[0] * zoominv | 0),
+      y: cur_coords.y + (mus_point[1] * zoominv | 0),
+    }
+  }
+
+  /** processes a click on a board item, only left/right button allowed */
   function _process_item_click(click, buttons){
     if(!checkAction()){
-      if(click.button === Constants.MOUSE_BTN_LEFT && childItems.length > 0){
+      if(childItems.length > 0){
 
-        const item= itemUtils.current.find(e=>e.get().current.contains(click.element))
+        const item= itemUtils.current.find(e=>e?.get()?.current.contains(click.element)??false)
         if(item) {
-  
-          const
-            node= item.get().current,
-            grab= node.querySelector("[data-knob='grab']"),
-            resize= node.querySelector("[data-knob='resize']")
 
-          if(click.element === grab || click.element === resize){
-
-            const 
-              mode= grab===click.element ? _ACTION_ID.grab : _ACTION_ID.resize,
-              overlay= document.body.querySelector("#board-canvas-overlay"),
-              top= canvasRef.current.querySelector("#board-canvas-top"),
-              ghost= node.cloneNode(true)
-
-            top.appendChild(ghost)
+          if(click.button=== Constants.MOUSE_BTN_RIGHT) {
             
-            node.style.setProperty("opacity", ".5")
+            const
+              node= item.get().current,
+              task= node.querySelectorAll("[data-item='task']")
 
-            overlay.style.setProperty("--overlay-cursor", mode===_ACTION_ID.grab ? "move": "se-resize")
-            overlay.style.setProperty("--overlay-pointerevents", "auto")
+            console.log(task)
 
-            set_currentAction({
-              type: _ACTION_TYPE.item,
-              id: mode,
-              half: store.board.half,
-              coords: item.get(Constants.ITEMDATA.coords),
-              origin: pointer.current.click.origin,
-              zoom: _ZOOM_LEVELS[canvasState.zoom],
-              zoominv: 1 / _ZOOM_LEVELS[canvasState.zoom],
-              item: [item, ghost]
-            })
+            let type=1
+
+            for(let t of task){
+              if(t.contains(click.element)) {
+                type=2
+                break
+              }
+            }
+
+            setContextMenu(type, click.origin, {item, element: click.element})
+            return
+          }
+          else if(click.button === Constants.MOUSE_BTN_LEFT){
+  
+            const
+              node= item.get().current,
+              grab= node.querySelector("[data-knob='grab']"),
+              resize= node.querySelector("[data-knob='resize']")
+  
+            if(click.element === grab || click.element === resize){
+  
+              const 
+                mode= grab===click.element ? _ACTION_ID.grab : _ACTION_ID.resize,
+                overlay= document.body.querySelector("#board-canvas-overlay"),
+                top= canvasRef.current.querySelector("#board-canvas-top"),
+                ghost= node.cloneNode(true)
+  
+              top.appendChild(ghost)
+              
+              node.style.setProperty("opacity", ".5")
+  
+              overlay.style.setProperty("--overlay-cursor", mode===_ACTION_ID.grab ? "move": "se-resize")
+              overlay.style.setProperty("--overlay-pointerevents", "auto")
+
+              const 
+                rect= item.get().current.getBoundingClientRect(),
+                invzoom= 1/_ZOOM_LEVELS[canvasState.zoom]
+  
+              set_currentAction({
+                type: _ACTION_TYPE.item,
+                id: mode,
+                size: { x: (rect.right - rect.x) * invzoom, y: (rect.bottom - rect.y) * invzoom },
+                rect,
+                half: store.board.half,
+                coords: item.get(Constants.ITEMDATA.coords),
+                origin: pointer.current.click.origin,
+                zoom: _ZOOM_LEVELS[canvasState.zoom],
+                zoominv: invzoom,
+                item: [item, ghost]
+              })
+            }
           }
         }
       }
@@ -279,14 +312,15 @@ const Board= ()=>{
         
         const 
           action= canvasState.action,
-          ghost= canvasState.action.item[1]
+          ghost= canvasState.action.item[1],
+          size= canvasState.action.size
 
         const
           cursor= mus.coords,
           delta= [ cursor.x - (action.origin.x - action.coords.x * action.zoom), cursor.y - (action.origin.y - action.coords.y * action.zoom)],
           new_coords= {
-            x: Utils.clamp((delta[0] * action.zoominv) | 0, -action.half.x, action.half.x),
-            y: Utils.clamp((delta[1] * action.zoominv) | 0, -action.half.y, action.half.y)
+            x: Utils.clamp((delta[0] * action.zoominv) | 0, -action.half.x, action.half.x-size.x),
+            y: Utils.clamp((delta[1] * action.zoominv) | 0, -action.half.y, action.half.y-size.y)
           }
 
         ghost.style.setProperty("--item-coords-x", new_coords.x + "px")
@@ -327,7 +361,7 @@ const Board= ()=>{
   
           last.item[0].set({
             coords: new_coords, 
-            dirty: Constants.ITEM_DIRTY.coords
+            dirty: Constants.ITEM_DIRTY.coords | Constants.ITEM_DIRTY.upload
           })
         }
 
@@ -352,10 +386,10 @@ const Board= ()=>{
   // #region --------------------------------------------------------------- ZOOM 
   // handle zoom changes
   React.useEffect(()=>{
+    // close contextual menu
+    if(canvasState.contextmenu != -1) setContextMenu(-1)
+      
     if(pointerUtils.getZsort(canvasRef.current.parentNode) >= -1 && !canvasState.action){
-
-      // close contextual menu
-      if(canvasState.contextmenu != -1) setContextMenu(-1)
 
       const delta= pointer.current.wheel
       
@@ -407,24 +441,73 @@ const Board= ()=>{
   
   function _preventDefaultContextMenu(e){ if(pointerUtils.getZsort(canvasRef.current) >= 0) { e.preventDefault() } }
 
-  function setContextMenu(mid, coords){
+  function setContextMenu(mid, coords, data){
     if(mid >=0){
       const detail= {
         mid,
         coords,
+        mode: mid > 0 ? 1 : 0,
         eventback: _CONTEXTMENU_CALLBACK_EVENT
+      }
+
+      const detailback= {
+        mid,
+        coords,
+        point: pointerToCanvasCoords(coords),
+        ...data
       }
 
       if(mid === 0){
         detail.items= [
-          { id:0,   label: "contextmenu.addlist",      enabled:true,    hidden:false },
-          { id:1,   label: "contextmenu.additem",      enabled:false,   hidden:false },
+          { id:0,   label: "contextmenu.add-list",      enabled:true,     hidden:false },
+          { id:1,   label: "contextmenu.add-item",      enabled:false,    hidden:false },
           null,
-          { id:2,   label: "contextmenu.toorigin",     enabled:true,    hidden:false },
-          { id:3,   label: "contextmenu.setorigin",    enabled:true,    hidden:false },   // hide this two if user is no board admin
-          { id:4,   label: "contextmenu.resetorigin",  enabled:true,    hidden:false }    // hide this two if user is no board admin
+          { id:2,   label: "contextmenu.paste",         enabled:false,    hidden:false },
+          { id:3,   label: "contextmenu.from-data",     enabled:false,    hidden:false },
+          null,
+          { id:4,   label: "contextmenu.settings",      enabled:true,     hidden:false },
+          { id:5,   label: "contextmenu.to-origin",     enabled:true,     hidden:false },
+          { id:6,   label: "contextmenu.set-origin",    enabled:true,     hidden:false },   // hide this two if user is no board admin
+          { id:7,   label: "contextmenu.reset-origin",  enabled:true,     hidden:false }    // hide this two if user is no board admin
         ]
+        detail.detailback= detailback
       }
+
+      if(mid === 1){
+        detail.items= [
+          { id:0,   label: "contextmenu.rename-list",   enabled:true,     hidden:false },
+          { id:1,   label: "contextmenu.styles-list",   enabled:false,    hidden:false },
+          { id:2,   label: "contextmenu.tags-list",     enabled:false,    hidden:false },
+          null,
+          { id:2,   label: "contextmenu.cut",           enabled:false,    hidden:false },
+          { id:3,   label: "contextmenu.copy",          enabled:true,     hidden:false },
+          { id:4,   label: "contextmenu.paste-over",    enabled:false,    hidden:false },
+          { id:5,   label: "contextmenu.from-data",     enabled:false,    hidden:false },
+          null,
+          { id:6,   label: "contextmenu.archive-list",  enabled:true,     hidden:false },
+          { id:7,   label: "contextmenu.delete-list",   enabled:true,     hidden:false }
+        ]
+        detail.detailback= detailback
+      }
+ 
+      if(mid === 2){
+        detail.items= [
+          { id:0,   label: "contextmenu.change-task",   enabled:true,     hidden:false },
+          { id:1,   label: "contextmenu.styles-task",   enabled:false,    hidden:false },
+          { id:2,   label: "contextmenu.tags-task",     enabled:false,    hidden:false },
+          null,
+          { id:3,   label: "contextmenu.cut",           enabled:false,    hidden:false },
+          { id:4,   label: "contextmenu.copy",          enabled:true,     hidden:false },
+          { id:5,   label: "contextmenu.paste-over",    enabled:false,    hidden:false },
+          { id:6,   label: "contextmenu.from-data",     enabled:false,    hidden:false },
+          null,
+          { id:7,   label: "contextmenu.archive-task",  enabled:true,     hidden:false },
+          { id:8,   label: "contextmenu.delete-task",   enabled:true,     hidden:false }
+        ]
+        detail.detailback= detailback
+      }
+
+      console.log(detailback)
 
       merge_canvasState({contextmenu: mid})
       window.dispatchEvent(new CustomEvent("k-contextmenu", { detail }))
@@ -435,31 +518,41 @@ const Board= ()=>{
     }
   }
 
-  function handleContextualAction(e){
+  async function handleContextualAction(e){
     const 
       new_canvasState= {},
-      id= e.detail
-
-    switch(id){
-      case 0:
-      case 1:
-        console.log("create item")
-        break
-      case 2:
-        const origin= canvasState.origin
-        new_canvasState.coords= { x:origin.x, y:origin.y }
-        new_canvasState.zoom= Utils.getClosestIndex(_ZOOM_LEVELS, origin.zoom)
-        new_canvasState.dirty= Constants.CANVAS_DIRTY.transform
-        break
-      case 3:
-        new_canvasState.origin= { ...canvasState.coords, zoom: _ZOOM_LEVELS[canvasState.zoom] }
-        break
-      case 4:
-        new_canvasState.origin= { x:0, y:0, zoom: 1.0 }
-        break
-    }
-    merge_canvasState(new_canvasState)
+      eventdata= e.detail
+      
     setContextMenu(-1)
+
+    if(eventdata.mid===0) {
+      switch(eventdata.id){
+        case 0: // create a list
+          const newListResult= await actions.objects_instance_list_create(eventdata.point)
+          if(newListResult) new_canvasState.dirty= Constants.CANVAS_DIRTY.data
+          break;
+        case 1:
+          break
+        case 5:
+          const origin= canvasState.origin
+          new_canvasState.coords= { x:origin.x, y:origin.y }
+          new_canvasState.zoom= Utils.getClosestIndex(_ZOOM_LEVELS, origin.zoom)
+          new_canvasState.dirty= Constants.CANVAS_DIRTY.transform
+          break
+        case 6:
+          new_canvasState.origin= { ...canvasState.coords, zoom: _ZOOM_LEVELS[canvasState.zoom] }
+          new_canvasState.dirty= Constants.CANVAS_DIRTY.upload
+          break
+        case 7:
+          new_canvasState.origin= { x:0, y:0, zoom: 1.0 }
+          new_canvasState.dirty= Constants.CANVAS_DIRTY.upload
+          break
+      }
+      merge_canvasState(new_canvasState)
+    }
+    else {
+      eventdata.item.cmCallback(e)
+    }
   }
 
   // #endregion
@@ -474,6 +567,25 @@ const Board= ()=>{
         half= store.board.half,
         originStyle= canvasRef.current.parentNode.style,
         canvasStyle= canvasRef.current.style
+
+      if(dirty & Constants.CANVAS_DIRTY.upload){
+        console.log("upload board pls")
+      }
+
+      if(dirty & Constants.CANVAS_DIRTY.data){
+        if(store.content){
+          const lists= store.content.lists
+          if(lists){
+            itemUtils.current= lists && lists.length > 0 ? Array(lists.length) : null
+            const react= lists.map((e,i)=>
+              <List key={`${e.id}|${e.board}`} bref={[itemUtils, i]} {...e} />
+            )
+            set_childItems(react)
+            //console.log(`board contains ${react.length} items`)
+          }
+        }
+        //else console.log(`empty board with id: ${store.board.id}`)
+      }
 
       if(dirty & Constants.CANVAS_DIRTY.size){
         originStyle.setProperty("--canvas-size-x", size.x.toString() + "px")
@@ -509,12 +621,11 @@ const Board= ()=>{
       merge_canvasState({dirty:0})
     }
   },[canvasState.millistamp])
-
   // #endregion
 
   // #region --------------------------------------------------------------- RETURN 
 	return (
-    <div id="board-canvas-wrapper" className="bg-zinc-300 dark:bg-zinc-800">
+    <div ref={selfRef} id="board-canvas-wrapper" className="bg-zinc-300 dark:bg-zinc-800">
       <div id="board-canvas-origin" className="relative pointer-skip">
         <div ref={canvasRef} id="board-canvas" className="flex px-8 py-4 gap-6 border-zinc-800 dark:border-zinc-300">
           <div id="board-canvas-background">

@@ -318,6 +318,7 @@ class Task(db.Model):
       "label": self.label,
       "description": self.description,
       "icon": (get_public_link(self.icon) if not '://' in self.icon else self.icon) if self.icon else None,
+      "position": self.position,
       "rwr": self.__get_rwr(deep),
       "list": self.list_id,
       "users": [v.id for v in self.users_] if self.users_ else [],

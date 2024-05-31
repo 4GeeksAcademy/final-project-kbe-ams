@@ -44,20 +44,19 @@ const _MODENAMES= Object.freeze([
 const DevTools = () => {
   const 
     { language, store, actions }= React.useContext(Context),
-    [ mode, set_mode ]= React.useState(0),
     nav= useNavigate()
 
   // ------------------------------------------------------------------- DEV
   const
     _devToolState= actions.getDevPref(Constants.DEVPREFS_SHOWSTATE),
     _devToolPosition= actions.getDevPref(Constants.DEVPREFS_PANELPOSITION),
+    _devToolMode= actions.getDevPref(Constants.DEVPREFS_TOOLSMODE),
     _devRender= actions.getDevPref(Constants.DEVPREFS_DEVRENDER),
     _fakeAuth= actions.getDevPref(Constants.DEVPREFS_FAKEAUTH),
     _fakeOwner= actions.getDevPref(Constants.DEVPREFS_FAKEOWNER)
 
   function toggle_devTools(e){ Utils.cancelEvent(e); actions.toggleDevPref(Constants.DEVPREFS_SHOWSTATE)}
   function move_devToolsPanel(e, i){ Utils.cancelEvent(e); actions.setDevPref(Constants.DEVPREFS_PANELPOSITION, i)}
-  function move_devToolsMode(e, i){ Utils.cancelEvent(e); actions.setDevPref(Constants.DEVPREFS_PANELPOSITION, i)}
   function toggle_devRender(e){ 
     Utils.cancelEvent(e)
     const new_devRender= !_devRender
@@ -67,9 +66,6 @@ const DevTools = () => {
   }
   function toggle_fakeAuth(e){ Utils.cancelEvent(e); actions.toggleDevAuth()}
   function toggle_fakeOwner(e){ Utils.cancelEvent(e); actions.toggleDevPref(Constants.DEVPREFS_FAKEOWNER)}
-  
-  async function execute_test(e){ 
-  }
 
   // ------------------------------------------------------------------- USER
   const 
@@ -78,7 +74,7 @@ const DevTools = () => {
   
   function toggle_darkModeState(e){ actions.toggleUserPref(Constants.USERPREFS_DARKMODE)}
 
-  function cycle_language(e){ 
+  function cycle_language(e){
     if(store.readyState.language){
       Utils.cancelEvent(e)
       actions.setUserPref(Constants.USERPREFS_LANGUAGE, _userLanguage < Constants.LANGUAGE_FILES.length -1 ? _userLanguage+1 : 0)
@@ -87,7 +83,7 @@ const DevTools = () => {
 
   function cycle_mode(e){ 
     Utils.cancelEvent(e)
-    set_mode(mode < _MODENAMES.length -1 ? mode+1 : 0)
+    actions.setDevPref(Constants.DEVPREFS_TOOLSMODE, _devToolMode < _MODENAMES.length -1 ? _devToolMode+1 : 0)
   }
 
   function load_userPrefs(e){ Utils.cancelEvent(e); actions.loadUserPrefs() }
@@ -149,11 +145,11 @@ const DevTools = () => {
         </div>
         { _devToolState &&
         <>
-          <button className={"devtools-btn w-32 " + _DEVTOOL_POSITIONS[_devToolPosition][3]} onClick={cycle_mode}>mode: {_MODENAMES[mode]}</button>
+          <button className={"devtools-btn w-32 " + _DEVTOOL_POSITIONS[_devToolPosition][3]} onClick={cycle_mode}>mode: {_MODENAMES[_devToolMode]}</button>
           <div className="max-h-70scr w-36 overflow-hidden bg-black bg-opacity-50 border border-slate-600 rounded-xl">
             <div className="max-h-70scr hidescroll-y overflow-x-hidden overflow-y-scroll">
               <div className="flex flex-col w-36 gap-2 p-2">
-              { mode=== 0 &&
+              { _devToolMode=== 0 &&
                 <>
                   <p>-- devPrefs --</p>
                   <button className="devtools-btn w-32" onClick={toggle_devRender}>devRender: {_devRender ? "true" : "false"}</button>
@@ -186,7 +182,7 @@ const DevTools = () => {
                   </div>
                 </>
               }
-              { mode === 1 &&
+              { _devToolMode === 1 &&
                 <>
                   <p>-- database --</p>
                   <div className="flex gap-2">

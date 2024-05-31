@@ -25,6 +25,10 @@
   
   --list-coords-x: 0px;
   --list-coords-y: 0px;
+
+  /**/
+
+  --sidepanel-size-x: 25%;
 }
 
 .pajuelas{
@@ -73,6 +77,15 @@
 .hidescroll-y {
   margin-right: -32px;
   padding-right: 32px; 
+}
+
+/* --------------------------------------------------- GENERAL */
+
+.clearinput, .clearinput:focus, .clearinput:active {
+  width: 100%;
+  background: none;
+  border: 0;
+  outline: 0;
 }
 
 /* --------------------------------------------------- ANIM */
@@ -165,7 +178,7 @@
   height: 0;
   position: absolute;
   z-index: -4095;
-  transform: translate(var(--canvas-size-half), var(--canvas-size-half));
+  transform: translate(var(--canvas-size-x-half), var(--canvas-size-y-half));
 }
 
 #board-canvas-top {
@@ -173,7 +186,7 @@
   height: 0;
   position: absolute;
   z-index: -2;
-  transform: translate(var(--canvas-size-half), var(--canvas-size-half));
+  transform: translate(var(--canvas-size-x-half), var(--canvas-size-y-half));
   pointer-events: none;
   & > * {
     pointer-events: none;
@@ -202,7 +215,34 @@
 
 .k--list {
   position: absolute;
-  transform: translate(-50%, 0);
+  transform: translate(0, 0);
   translate: var(--item-coords-x) var(--item-coords-y);
   resize: both;
+}
+
+/* --------------------------------------------------- OUTER CANVAS */
+
+.k--board-sidepanel {
+  flex-shrink: 0;
+  width: var(--sidepanel-size-x);
+  margin-right: calc( var(--sidepanel-closemargin-x) + 20px);
+
+  &.open { margin-right: 0; }
+
+  transition: margin 300ms ease-out;
+}
+
+.trashbin {
+  pointer-events: all;
+  position: absolute;
+  bottom: 0; right: 0;
+  box-shadow: -2px -2px .5em #ff6a6a88;
+  border-top-left-radius: 80%;
+  animation: trashbin-walk-in 1250ms ease-out;
+  font-size: 6em;
+}
+
+@keyframes trashbin-walk-in {
+  from{ scale: 0; bottom: -50%; right: -20%; box-shadow: 0 0 0 #ff6a6a88 }
+  to{ scale: 1.0; bottom: 0; right: 0; box-shadow: -2px -2px .5em #ff6a6a88 }
 }

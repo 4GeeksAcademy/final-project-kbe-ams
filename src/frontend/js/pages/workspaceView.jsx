@@ -19,15 +19,12 @@ const WorkspaceView = () => {
 
     const workspace = await actions.workspaces_instance_get(wid)
 
-    console.log("workspace:", workspace)
-    console.log("boards:", workspace.boards)
-
     set_boards(workspace.boards)
     workspace.boards= null;
     set_workspace(workspace)
 
     actions.setNavbarBreadcumb([
-      ["/title.dashboard", "/dashboard"],
+      ["çtitle.dashboard", "/dashboard"],
       [workspace.title, null]
     ])
       

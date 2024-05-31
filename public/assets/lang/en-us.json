@@ -39,11 +39,26 @@
     }
   },
   "contextmenu": {
-    "addlist":      "Add list here",
-    "additem":      "Add item here",
-    "toorigin":     "Go to origin",
-    "setorigin":    "Set origin",
-    "resetorigin":  "Reset origin"
+    "add-list":       "Add list here",
+    "add-item":       "Add item here",
+    "to-origin":      "Go to origin",
+    "set-origin":     "Set origin",
+    "reset-origin":   "Reset origin",
+    "rename-list":    "Rename list",
+    "styles-list":    "Set list styles",
+    "tags-list":      "Choose list tags",
+    "archive-list":   "Archive list",
+    "delete-list":    "Delete list",
+    "change-task":    "Change task",
+    "styles-task":    "Set task styles",
+    "tags-task":      "Choose task tags",
+    "archive-task":   "Archive task",
+    "delete-task":    "Delete task",
+    "cut":            "Cut",
+    "copy":           "Copy",
+    "paste":          "Paste",
+    "paste-over":     "Paste over",
+    "from-data":      "From data"
   },
   "panel": {
     "boardsettings": {
@@ -57,7 +72,8 @@
     "first-workspace":  "My first workspace",
     "first-board":      "My first board",
     "title-workspace":  "Untitled workspace",
-    "title-board":      "Untitled board"
+    "title-board":      "Untitled board",
+    "title-list":      "New list"
   },
   "placeholder": {
     "description":  "[write a description here...]",

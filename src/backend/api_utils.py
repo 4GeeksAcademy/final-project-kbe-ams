@@ -160,10 +160,8 @@ def hash_password(password:str) -> bytes:
   const= fnv1256(current_app.config["JWT_SECRET_KEY"])
 
   hashparts=[
-    str(fnv132(password + current_app.config["JWT_SECRET_KEY"])),
-    str(fnv164(current_app.config["JWT_SECRET_KEY"] + password)),
-    str(fnv1128(password + current_app.config["JWT_SECRET_KEY"])),
-    str(fnv1256(current_app.config["JWT_SECRET_KEY"] + password))
+    str(fnv132(f"{password}{current_app.config['JWT_SECRET_KEY']}")),
+    str(fnv164(f"{current_app.config['JWT_SECRET_KEY']}{password}"))
   ]
 
   nbytes= bytes("".join(hashparts), 'utf-8')
@@ -176,8 +174,7 @@ def hash_password(password:str) -> bytes:
     hash= hash ^ b
     result.append(hash & 0xFF)
 
-  #print(result)
-  return result
+  return bytes(result)
 
 #--- test a password
 def check_password(input:str, hashed:bytes) -> bool:
@@ -202,48 +199,49 @@ def endpoint_safe(
       __parsed_data__= {}
       __type= data_type
       
-      try:
-        if content_type: # check for content_type
-          if not 'Content-Type' in request.headers or request.headers['Content-Type'] != content_type: return response(400, f"Content-Type is not '{content_type}'")
-          if __type: return response(400, "cannot define shell data-type if content-type is beign defined")
-          if content_type == 'application/json':
-            if not request.data: return response(400, "body must contain data")
-            __type= "json"
-          elif content_type == 'multipart/form-data':
-            if not request.form and not request.files: return response(400, "body must contain data")
-            __type= "multipart"
-        if __type:
-          if __type=="json": # parse json
-            try: __parsed_data__['json']= request.get_json(force=True)
-            except: return response(400, "body contains no valid JSON")
-            if not __parsed_data__['json'] and required_props: return response(400, "body contains no JSON")
-          if __type=="multipart": # parse multipart json + files
-            try: __parsed_data__['json']= json.loads(request.form['json'])
-            except: pass
-            try: __parsed_data__['files']= request.files
-            except: pass
-            if __parsed_data__['json'] and not __parsed_data__['files']: return response(400, "body contains no data")
-          if required_props: # check required json properties
-            if not __parsed_data__['json']: return response(400, "given required properties but no data received")
-            __json= __parsed_data__['json']
-            for p in required_props:
-              if not p in __json: return response(400, f"missing required property '{p}'")
-              if type(__json[p])== str and __json[p]== "": return response(400, f"empty required property '{p}'")
-            if props_strict and len(__json.keys()) > len(required_props): return response(400, f"too many json properties")
-        if required_params: # check required url parameters
-          __params= {}
-          for p in required_params:
-            if not p in request.args: return response(400, f"missing required url parameter '{p}'")
-            if not request.args[p] or (type(request.args[p])== str and request.args[p]== ""): return response(400, f"empty required url parameter '{p}'")
-            __params[p]= request.args[p]
-          if params_strict and len(__params.keys()) > len(required_params): return response(400, f"too many url parameters")
-          __parsed_data__['params']= __params
+      #try:
+      if content_type: # check for content_type
+        if not 'Content-Type' in request.headers or request.headers['Content-Type'] != content_type: return response(400, f"Content-Type is not '{content_type}'")
+        if __type: return response(400, "cannot define shell data-type if content-type is beign defined")
+        if content_type == 'application/json':
+          if not request.data: return response(400, "body must contain data")
+          __type= "json"
+        elif content_type == 'multipart/form-data':
+          if not request.form and not request.files: return response(400, "body must contain data")
+          __type= "multipart"
+      if __type:
+        if __type=="json": # parse json
+          try: __parsed_data__['json']= request.get_json(force=True)
+          except: return response(400, "body contains no valid JSON")
+          if not __parsed_data__['json'] and required_props: return response(400, "body contains no JSON")
+        if __type=="multipart": # parse multipart json + files
+          try: __parsed_data__['json']= json.loads(request.form['json'])
+          except: pass
+          try: __parsed_data__['files']= request.files
+          except: pass
+          if __parsed_data__['json'] and not __parsed_data__['files']: return response(400, "body contains no data")
+        if required_props: # check required json properties
+          if not __parsed_data__['json']: return response(400, "given required properties but no data received")
+          __json= __parsed_data__['json']
+          print(type(required_props))
+          for p in required_props:
+            if not p in __json: return response(400, f"missing required property '{p}'")
+            if type(__json[p])== str and __json[p]== "": return response(400, f"empty required property '{p}'")
+          if props_strict and len(__json.keys()) > len(required_props): return response(400, f"too many json properties")
+      if required_params: # check required url parameters
+        __params= {}
+        for p in required_params:
+          if not p in request.args: return response(400, f"missing required url parameter '{p}'")
+          if not request.args[p] or (type(request.args[p])== str and request.args[p]== ""): return response(400, f"empty required url parameter '{p}'")
+          __params[p]= request.args[p]
+        if params_strict and len(__params.keys()) > len(required_params): return response(400, f"too many url parameters")
+        __parsed_data__['params']= __params
 
-        return current_app.ensure_sync(fn)(*args, **kwargs, **__parsed_data__) # execute the actual endpoint function
+      return current_app.ensure_sync(fn)(*args, **kwargs, **__parsed_data__) # execute the actual endpoint function
       
-      except Exception as e: # any unhandled error (even in endpoint function) ends up here
-        print(e)
-        return response_500(repr(e))
+      #except Exception as e: # any unhandled error (even in endpoint function) ends up here
+      #  print(e)
+      #  return response_500(repr(e))
       
     return decorator
 

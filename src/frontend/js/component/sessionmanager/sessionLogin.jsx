@@ -1,7 +1,7 @@
 import React, { useContext, useState, useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
-import { Context } from "../store/appContext.jsx";
-import "../../styles/_styles.miguel.css";
+import "../../../styles/_styles.miguel.css";
+import { Context } from "../../store/appContext";
 
 function SessionLogin({ mode }) {
     const { store, actions } = useContext(Context);

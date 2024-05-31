@@ -1,6 +1,6 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom';
-import { Context } from '../store/appContext.jsx';
+import { Context } from '../../store/appContext.jsx';
 
 const SessionLogout = () => {
     const { store, actions }= React.useContext(Context)

@@ -51,7 +51,7 @@
       "thumbnail": "default",
       "owner_id": 1,
       "workspace_id": 1,
-      "settings": "2048|1024|0|0|1.0|#333"
+      "settings": "16384|16384|0|0|1.0|#333"
     },
     {
       "name": "the another board",
@@ -59,7 +59,16 @@
       "thumbnail": "default",
       "owner_id": 1,
       "workspace_id": 1,
-      "settings": "512|512|-256|0|0.5|https://static.vecteezy.com/system/resources/thumbnails/009/194/921/small_2x/old-marble-tile-with-cement-texture-cement-and-concrete-stone-mosaic-tile-free-photo.jpg"
+      "settings": "28433|16384|-2256|4543|0.5|https://www.sketchuptextureclub.com/public/texture_m/0025-cork-texture-seamless.jpg?512"
+    },
+    {
+      "name": "the infinite one",
+      "description": "the infinite example",
+      "icon": "default",
+      "thumbnail": "default",
+      "owner_id": 1,
+      "workspace_id": 1,
+      "settings": "4194304|4194304|0|0|1.0|#333"
     }
   ],
   "lists": [
@@ -72,6 +81,11 @@
       "title": "second db list",
       "board_id": 1,
       "settings": "-320|100|-1|-1"
+    },
+    {
+      "title": "Welcome to the void",
+      "board_id": 3,
+      "settings": "0|9|-1|-1"
     }
   ],
   "tasks": [
@@ -102,6 +116,13 @@
       "icon": null,
       "position": 0,
       "list_id": 2
+    },
+    {
+      "label": "look around",
+      "description": "and see the eternity",
+      "icon": null,
+      "position": 0,
+      "list_id": 3
     }
   ]
 }

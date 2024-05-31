@@ -11,7 +11,7 @@ const appContext = ReactComponent => {
 				getLanguage: () => state.language,
 				getActions: () => state.actions,
 				setStore: new_store => _setstore(Object.assign(state.store, new_store)),
-        mergeStore: (new_store, objectsOnly=true) => _setstore(_merge(state.store, new_store, objectsOnly)),
+        mergeStore: (new_store) => _setstore(_merge(state.store, new_store)),
 				setLanguage: new_language => _setlanguage(Object.assign(state.language, new_language)),
 			})
 		)
@@ -28,15 +28,21 @@ const appContext = ReactComponent => {
     function _setlanguage(new_language) {
       setState({
         store: { ...state.store },
-        language: { ...new_language, millistamp:Date.now(), get:state.language.get },
+        language: { 
+          ...new_language, 
+          millistamp:Date.now(),  
+          test:state.language.get, 
+          get:state.language.get 
+        },
         actions: { ...state.actions },
         millistamp: Date.now()
       })
     }
 
-    function _merge(a, b, objectsOnly) {
+    function _merge(a, b) {
       return Object.entries(b).reduce((o, [k, v]) => {
-          o[k] = v && typeof v === 'object' ? _merge(o[k] = o[k] || (!objectsOnly && (Array.isArray(v) ? [] : {})), v, objectsOnly) : v
+          if(Array.isArray(v)) o[k]= v
+          else o[k]= v && typeof v === 'object' ? _merge(o[k] = o[k] || {}, v) : v
           return o
       }, a)
     }
