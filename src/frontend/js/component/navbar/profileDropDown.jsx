@@ -20,8 +20,8 @@ const ProfileDropDown= ()=>{
           <span className="h-[2px] bg-gray-400 dark:bg-gray-700 w-full mx-auto rounded-full my-1"></span>
           <div className="flex flex-col">
               <ul className="grid gap-2">
-                <button onClick={()=>{nav("/settings")}} className="text-left w-full hover:bg-violet-950 cursor-pointer px-5">Account settings</button>
-                <button onClick={()=>{nav("/contact")}} className="text-left w-full hover:bg-violet-950 cursor-pointer px-5">Support</button>
+                <button onClick={()=>{nav("/settings")}} className="text-left w-full dark:hover:bg-violet-950 hover:bg-accent-n cursor-pointer px-5">Account settings</button>
+                <button onClick={()=>{nav("/contact")}} className="text-left w-full dark:hover:bg-violet-950 hover:bg-accent-n cursor-pointer px-5">Support</button>
               </ul>
           </div>
           <span className="h-[2px] bg-gray-400 dark:bg-gray-700 w-full mx-auto rounded-full my-1"></span>

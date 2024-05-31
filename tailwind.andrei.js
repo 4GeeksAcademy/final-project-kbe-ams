@@ -61,9 +61,9 @@ module.exports = {
           '-webkit-text-stroke': '1px white',
           'text-stroke': '1px white',
         },
-        // Add more custom utilities as needed
       };
 
       addUtilities(newUtilities, ['responsive', 'hover']);
-}],
+},
+],
 }

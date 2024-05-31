@@ -2380,6 +2380,11 @@ html{
   border-color: rgb(14 9 15 / var(--tw-border-opacity));
 }
 
+.hover\:bg-accent-n:hover{
+  --tw-bg-opacity: 1;
+  background-color: rgb(255 213 0 / var(--tw-bg-opacity));
+}
+
 .hover\:bg-b:hover{
   --tw-bg-opacity: 1;
   background-color: rgb(3 3 3 / var(--tw-bg-opacity));
@@ -2717,6 +2722,11 @@ html{
 
 .dark\:hover\:bg-transparent:hover:where([data-darkmode], [data-darkmode] *){
   background-color: transparent;
+}
+
+.dark\:hover\:bg-violet-950:hover:where([data-darkmode], [data-darkmode] *){
+  --tw-bg-opacity: 1;
+  background-color: rgb(46 16 101 / var(--tw-bg-opacity));
 }
 
 .dark\:hover\:bg-white:hover:where([data-darkmode], [data-darkmode] *){

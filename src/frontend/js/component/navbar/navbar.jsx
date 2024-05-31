@@ -165,7 +165,7 @@ const Navbar = () => {
 
 
     <ReactTooltip
-      className="w-16"
+      className="w-16 "
       id="my-tooltip-1"
       place="bottom"
       content={<p>Don't know how to use Keqqu?<br></br>Don't worry, soon you will have tutorial videos! </p>}

@@ -6,7 +6,7 @@ import Constants from "../app/constants.js";
 
 //--- icons ------------------------------------
 import bricks from "../../assets/img/home-view-images/bricks.png"
-import vieja from "../../assets/img/image.png"
+import landingImg from "../../assets/img/home-view-images/landingImage.jpg"
 
 const LandingView = () => {
   const
@@ -40,14 +40,15 @@ const LandingView = () => {
         {/*--- hero section ------------------------------------ */}
             <div id="heroSection" className="w-full grid grid-cols-2 p-5 items-center">
               <div className="mx-auto my-8">
-                <h1 className="f-tittle text-[64px] py-8 text-b dark:text-w">Organizing your tasks has never been easier and more convinient</h1>
+                <h1 className="f-tittle text-[64px] py-2 text-b dark:text-w">Organizing your tasks has never been easier and more convinient</h1>
                 <p className="f-body text-xl py-2 w-8/12 text-b dark:text-w">Create a workspace and plan your way to go<br/> Your goals are just a few "checks" away from you </p>
 
                 <button onClick={()=>{nav("/login")}} className="border dark:border-accent-l border-primary-n rounded-[10rem] px-10 py-4 f-tittle text-xl bg-primary-n dark:bg-accent-l dark:text-black mt-10 hover:bg-transparent hover:text-primary-n dark:hover:text-accent-l transition duration-300 ease-in-out">Get started - its free!</button>
               
               </div>
-              <div className="mx-auto bg-b">
-                <img src={vieja} alt="" />
+              <div className="mt-16 mx-auto rounded-[3rem] overflow-hidden">
+                <img className=""
+                  src={landingImg} alt="" />
                 </div>
             </div>
             
