@@ -54,7 +54,8 @@ const Board= ()=>{
     }),
     canvasStateRef= React.useRef(canvasState),
     [childItems, set_childItems]= React.useState([]),
-    itemUtils= React.useRef([])
+    itemUtils= React.useRef([]),
+    itemUtilsRef= React.useRef(itemUtils)
 
   function merge_canvasState(new_state){ _scs({ ...Object.assign(canvasStateRef.current, { ...new_state, millistamp: Date.now() })})}
   function set_currentAction(new_action){ _scs({ ...Object.assign(canvasStateRef.current, { lastaction: canvasStateRef.current.action, action: new_action, millistamp: Date.now() })})}
@@ -559,7 +560,7 @@ const Board= ()=>{
   
   // #region --------------------------------------------------------------- UPDATES
   // apply canvas changes and clear the dirty state
-  React.useEffect(()=>{
+  React.useEffect(()=>{ async function handle(){
     if(canvasState.dirty>0) {
       const 
         dirty= canvasState.dirty,
@@ -569,22 +570,27 @@ const Board= ()=>{
         canvasStyle= canvasRef.current.style
 
       if(dirty & Constants.CANVAS_DIRTY.upload){
-        console.log("upload board pls")
+        
+
+        actions.board_push(canvasState)
+
+
       }
 
       if(dirty & Constants.CANVAS_DIRTY.data){
-        if(store.content){
-          const lists= store.content.lists
-          if(lists){
-            itemUtils.current= lists && lists.length > 0 ? Array(lists.length) : null
-            const react= lists.map((e,i)=>
-              <List key={`${e.id}|${e.board}`} bref={[itemUtils, i]} {...e} />
-            )
-            set_childItems(react)
-            //console.log(`board contains ${react.length} items`)
-          }
+
+        const content= await actions.objects_board_get()
+        if(content){
+
+          itemUtils.current= content.lists.length > 0 ? Array(content.lists.length) : null
+          const react= content.lists.map((e,i)=>
+            <List key={`${e.id}|${e.board}`} bref={[itemUtils, i]} {...e} />
+          )
+
+          set_childItems(react)
+          //console.log(`list contains ${react.length} tasks`)
         }
-        //else console.log(`empty board with id: ${store.board.id}`)
+        //else console.log(`empty list with id: ${id}`)
       }
 
       if(dirty & Constants.CANVAS_DIRTY.size){
@@ -620,7 +626,7 @@ const Board= ()=>{
 
       merge_canvasState({dirty:0})
     }
-  },[canvasState.millistamp])
+  } handle() },[canvasState.millistamp])
   // #endregion
 
   // #region --------------------------------------------------------------- RETURN 

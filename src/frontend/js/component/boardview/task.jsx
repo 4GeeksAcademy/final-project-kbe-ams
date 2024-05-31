@@ -3,16 +3,20 @@ import { Context } from "../../store/appContext.jsx"
 
 var _temp
 
-const Task = ({ label, icon, bref }) => {
+const Task = ({ id, label, position, icon, bref, listupdatecallback }) => {
 	const 
     { language, store, actions } = React.useContext(Context),
-    itemRef= React.useRef(null)
+    inputRef= React.useRef(null),
+    selfRef= React.useRef(null)
 
   const 
     [ itemState, _scs ]= React.useState({
+      id: id,
       label: label,
       inRename: false,
+      editonce: false,
       icon: icon,
+      upload: false,
       millistamp: Date.now()
     }),
     itemStateRef= React.useRef(itemState)
@@ -21,11 +25,27 @@ const Task = ({ label, icon, bref }) => {
 
   React.useEffect(()=>{ 
     bref[0].current[bref[1]]= {
-      get: (prop)=> { return !prop ? itemRef : itemState[prop] }, 
+      get: (prop)=> { return !prop ? selfRef : itemState[prop] }, 
       set: (state)=>{ merge_itemState(state) },
       cmCallback: (e)=>{handleContextualMenu(e)}
     }
   },[])
+
+  React.useEffect(()=>{ async function handle(){
+
+    if(selfRef.current && itemState.editonce){
+      const result= await actions.objects_task_push(itemState.id, itemState.label)
+      if(result) listupdatecallback()
+    }
+
+  } handle()
+  },[itemState.label])
+
+  React.useEffect(()=>{ 
+    if(inputRef.current){
+      inputRef.current.focus()
+    }
+  },[inputRef.current])
   
   // --------------------------------------------------------------- CONTEXTUAL MENU 
     
@@ -33,9 +53,14 @@ const Task = ({ label, icon, bref }) => {
     switch(e.detail.id){
       case 0:
         merge_itemState({inRename: true})
-        _temp= itemState.label
+        _temp= language.test(itemState.label)
         break
     }
+  }
+
+  function enterRename(){
+    merge_itemState({inRename: true, editonce: true})
+    _temp= language.test(itemState.label)
   }
 
   function handleLabelEdit(e){
@@ -46,11 +71,11 @@ const Task = ({ label, icon, bref }) => {
   }
 
 	return (
-    <div ref={itemRef} data-item="task" className="flex h-12 rounded-md bg-zinc-200 dark:bg-zinc-800">
+    <div ref={selfRef} data-item="task" className="flex h-12 rounded-md bg-zinc-200 dark:bg-zinc-800">
       { itemState.inRename ?
-        <input className="clearinput mx-4 text-lg my-auto text-purple-800 dark:text-accent-n" defaultValue={_temp} onBlur={handleLabelEdit} onChange={handleLabelEdit} onKeyDown={handleLabelEdit}/>
+        <input ref={inputRef} className="clearinput mx-4 text-lg my-auto text-purple-800 dark:text-accent-n" placeholder={_temp} onBlur={handleLabelEdit} onChange={handleLabelEdit} onKeyDown={handleLabelEdit}/>
         :
-        <span className="mx-4 text-lg my-auto">{language.test(itemState.label)}</span>
+        <span onDoubleClick={()=>{enterRename()}} className="mx-4 text-lg my-auto">{language.test(itemState.label)}</span>
       }
 		</div>
 	)

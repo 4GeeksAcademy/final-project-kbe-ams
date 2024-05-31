@@ -534,6 +534,7 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
         if(res.status==200 && res.data) return res.data
         return null
       },
+
       //#endregion
 
       // #region ----------------------------------------------------------------------------------------- OBJECTS
@@ -567,7 +568,45 @@ const storeState = ({ getStore, getLanguage, getActions, setStore, mergeStore, s
 
         if(content) console.log("hello bojos!")
 
-        return content != null
+        return content?? null
+      },
+
+      /** get the content of a list */
+      objects_list_get: async (id)=>{
+        const res= await getActions().simpleBackendRequest({
+          endpoint:"GET|objects:/list/" + id
+        })
+
+        const 
+          raw= res.data??null,
+          list= getActions().getListFromRawData(raw)
+
+        return list?? null
+      },
+
+      /** set the content of a list */
+      objects_task_push: async (id, label)=>{
+        const res= await getActions().simpleBackendRequest({
+          endpoint:"POST|objects:/task",
+          body: {
+            id: id,
+            label: label,
+          }
+        })
+        return res.status==200
+      },
+
+      /** set the content of a list */
+      objects_list_push: async (id, title, coords)=>{
+        const res= await getActions().simpleBackendRequest({
+          endpoint:"POST|objects:/list",
+          body: {
+            id: id,
+            title: title,
+            settings: `${coords.x|0}|${coords.y|0}|-1|-1`
+          }
+        })
+        return res.status==200
       },
 
       /** create a list */

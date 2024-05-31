@@ -16,6 +16,8 @@ const Navbar = () => {
     const nav = useNavigate();
     const dropdownRef = useRef(null);
 
+    const _userDarkMode= actions.getUserPref(Constants.USERPREFS_DARKMODE)
+
 
 //--- para click fuera de dropDown n shi -------------------------------------------------
     const handleClickOutside = (event) => {
@@ -52,6 +54,8 @@ const Navbar = () => {
     else nav("/?href=" + obj)
   }
 
+  function toggle_darkModeState(e){ actions.toggleUserPref(Constants.USERPREFS_DARKMODE)}
+
   return (
     <>
     {store.userData ? 
@@ -67,6 +71,13 @@ const Navbar = () => {
               >
                   ?
               </div>
+              <button className="w-9 h-9 rounded-full overflow-hidden mr-4" onClick={toggle_darkModeState}>
+                {_userDarkMode ? 
+                  <i className="fa-regular fa-moon text-xl"></i>
+                  :
+                  <i className="fa-regular fa-sun text-xl"></i>
+                }
+              </button>
               <button className="w-9 h-9 rounded-full overflow-hidden" onClick={()=>{set_profileDropDown(!profileDropDown)}}>
                 <img className="size-full" src={store.userData.avatar} alt="user avatar" />
               </button>
@@ -114,6 +125,13 @@ const Navbar = () => {
             <li onClick={() => nav("/contact")} className="m-5 mx-auto f-tittle cursor-pointer text-b dark:text-w">Contact</li>
           </ul>
           <div className="ml-10">
+              <button className="w-9 h-9 rounded-full overflow-hidden mr-4" onClick={toggle_darkModeState}>
+                {_userDarkMode ? 
+                  <i className="fa-regular fa-moon text-xl"></i>
+                  :
+                  <i className="fa-regular fa-sun text-xl"></i>
+                }
+              </button>
             <button onClick={()=>{nav("/signup")}} className="f-body border border-black dark:border-w hover:bg-black rounded-[30px] px-7 py-1 text-b dark:bg-w dark:text-black dark:hover:bg-transparent hover:text-white transition duration-300 ease-in-out">Register</button>
             <button onClick={()=>{nav("/login")}} className="f-body hover:bg-b hover:text-w border-black border-[1px] dark:border-w rounded-[30px] ml-10 px-7 py-1 text-b dark:text-w dark:hover:bg-white dark:hover:text-black transition duration-300 ease-in-out">Login</button>
           </div>

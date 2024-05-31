@@ -38,6 +38,70 @@ def handle_objects_board(id):
   
   return api_utils.response_200(board.serialize_content(deep=4))
 
+# -------------------------------------- /list
+# get list content
+@objects.route('/list/<int:id>', methods=['GET'])
+@jwt_required()
+def handle_objects_list(id):
+  
+  user, error= api_utils.get_user_by_identity()
+  if error: return error
+
+  lid= parse_int(id, None)
+  if not lid or lid < 1: return api_utils.response(400, f"invalid list id: {lid}")
+
+  _list, error= get_list_by_id(lid)
+  if error: return error
+
+  if user.id != _list.board_.owner_id:
+    if not user.boards_.filter(Board.id== _list.board_.id).first(): return api_utils.response(403, "user has no permission to get the requested objects")
+  
+  return api_utils.response_200(_list.serialize(deep=1))
+
+# -------------------------------------- /list
+# set list content
+@objects.route('/list', methods=['POST'])
+@jwt_required()
+@api_utils.endpoint_safe( content_type="application/json", required_props=['id', 'title', 'settings' ])
+def handle_objects_list_push(json):
+  
+  user, error= api_utils.get_user_by_identity()
+  if error: return error
+
+  lid= parse_int(json['id'], None)
+  if not lid or lid < 1: return api_utils.response(400, f"invalid list id: {lid}")
+
+  _list, error= get_list_by_id(lid)
+  if error: return error
+
+  _list.title= json['title']
+  _list.settings= json['settings']
+
+  db.session.commit()
+  
+  return api_utils.response_200()
+
+# -------------------------------------- /task
+# set task content
+@objects.route('/task', methods=['POST'])
+@jwt_required()
+@api_utils.endpoint_safe( content_type="application/json", required_props=['id', 'label'])
+def handle_objects_task_push(json):
+  
+  user, error= api_utils.get_user_by_identity()
+  if error: return error
+
+  tid= parse_int(json['id'], None)
+  if not tid or tid < 1: return api_utils.response(400, f"invalid task id: {tid}")
+
+  _task, error= get_task_by_id(tid)
+  if error: return error
+
+  _task.label= json['label']
+  db.session.commit()
+  
+  return api_utils.response_200()
+
 # -------------------------------------- /instance-list
 # create a list
 # required json 'board_id' -- the board to add it on
@@ -114,3 +178,9 @@ def get_list_by_id(lid):
   list_= db.session.query(List).get(lid)
   if not list_: return None, api_utils.response(404, "list not found")
   return list_, None
+
+def get_task_by_id(tid):
+  if not tid or tid < 1: return None, api_utils.response(400, f"invalid task id: {tid}")
+  task_= db.session.query(Task).get(tid)
+  if not task_: return None, api_utils.response(404, "task not found")
+  return task_, None

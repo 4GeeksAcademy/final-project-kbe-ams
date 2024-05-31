@@ -21,6 +21,7 @@ const List = ({id, title, coords, users, tasks, tags, styles, bref}) => {
 
   const 
     [ itemState, _scs ]= React.useState({
+      id: id,
       title: title,
       inRename: false,
       coords: { x:coords.x, y:coords.y },
@@ -31,7 +32,8 @@ const List = ({id, title, coords, users, tasks, tags, styles, bref}) => {
     }),
     itemStateRef= React.useRef(itemState),
     [ childItems, set_childItems ]= React.useState([]),
-    itemUtils= React.useRef([])
+    itemUtils= React.useRef([]),
+    itemUtilsRef= React.useRef(itemUtils)
   
   function merge_itemState(new_state){ _scs({ ...Object.assign(itemStateRef.current, { ...new_state, millistamp: Date.now() })})}
 
@@ -47,26 +49,25 @@ const List = ({id, title, coords, users, tasks, tags, styles, bref}) => {
   // --------------------------------------------------------------- DIRTY UPDATES
   
   // apply canvas position changes
-  React.useEffect(()=>{
+  React.useEffect(()=>{ async function handle() {
     if(itemState.dirty != 0){
       const itemStyle= itemRef.current.style
 
       if(itemState.dirty & Constants.ITEM_DIRTY.upload){
-        console.log("upload data pls")
+        
+        const result= await actions.objects_list_push(itemState.id, itemState.title, itemState.coords)
+        if(result) merge_itemState({dirty: Constants.ITEM_DIRTY.data})
       }
 
       if(itemState.dirty & Constants.ITEM_DIRTY.data){
         
-        if(localTasks){
+        const list= await actions.objects_list_get(itemState.id)
+        if(list){
 
-          console.log("ok updating")
-            
-          itemUtils.current= localTasks.length > 0 ? Array(localTasks.length) : null
-          const react= localTasks.map((e,i)=>
-            <Task key={`${e.id}|${e.list}`} bref={[itemUtils, i]} {...e} />
+          itemUtils.current= list.tasks.length > 0 ? Array(list.tasks.length) : []
+          const react= list.tasks.map((e,i)=>
+            <Task key={`${e.id}|${e.list}`} listupdatecallback={listupdatecallback} bref={[itemUtils, i]} {...e} />
           )
-
-          console.log(react)
 
           set_childItems(react)
           //console.log(`list contains ${react.length} tasks`)
@@ -92,16 +93,14 @@ const List = ({id, title, coords, users, tasks, tags, styles, bref}) => {
   
       merge_itemState({dirty:0})
     }
-  },[itemState.millistamp])
+  } handle() },[itemState.millistamp])
   
   // --------------------------------------------------------------- CONTEXTUAL MENU 
     
   async function handleContextualMenu(e){
 
-    const item= itemUtils.current.find(x=>x?.get()?.current.contains(e.detail.element)??false)
-    if(item) {
-      item.cmCallback(e)  
-    }
+    const item= itemUtilsRef.current.current.find(x=>x?.get()?.current.contains(e.detail.element)??false)
+    if(item) { item.cmCallback(e) }
     else {
       switch(e.detail.id){
         case 0:
@@ -151,6 +150,10 @@ const List = ({id, title, coords, users, tasks, tags, styles, bref}) => {
       if(e.key==='Escape') merge_itemState({inRename: false})
       else merge_itemState({inRename: false, title: e.target.value, dirty: Constants.ITEM_DIRTY.upload})
     }
+  }
+
+  function listupdatecallback(){
+    merge_itemState({dirty:Constants.ITEM_DIRTY.data})
   }
 
   // --------------------------------------------------------------- RETURN 
